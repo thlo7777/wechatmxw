@@ -1,0 +1,5 @@
+name = wechat_api
+description = 微信平台应用接口API模块.
+
+dependencies[] = encrypt
+core = 7.x

@@ -1,0 +1,657 @@
+<?php
+/**
+ * Implements hook_schema()
+ */
+function wechat_api_schema(){
+  $schema = array();
+
+  //wechat api token interface table
+  $schema['wechat_api_appid'] = array(
+    // Example (partial) specification for table "wechat hotel ranking".
+    'description' => 'for wechat api platfrom basic information',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'Token' => array('description' => 'wechat token',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'AppID' => array('description' => 'wechat app id',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'AppSecret' => array('description' => 'wechat AppSecret',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'wechat_url' => array('description' => 'own wechat server address',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 512,
+                     'not null' => TRUE,),
+
+      'jsapi_ticket'=> array(
+                      'description' => 'ticket for jsapi, expire time is 7200 seconds, same with access token',
+                      'type' => 'varchar',
+                      'length' => '512',
+                      'not null' => FALSE,
+                      'default' => '',),
+
+      'mchid'=> array(
+                      'description' => 'company merchant ID from wechat',
+                      'type' => 'varchar',
+                      'length' => '255',
+                      'not null' => FALSE,
+                      'default' => '',),
+
+      'mchkey'=> array(
+                      'description' => 'company merchant key from wechat',
+                      'type' => 'varchar',
+                      'length' => '255',
+                      'not null' => FALSE,
+                      'default' => '',),
+
+      'notify_url'=> array(
+                      'description' => 'wechat merchant notify url',
+                      'type' => 'varchar',
+                      'length' => '1024',
+                      'not null' => FALSE,
+                      'default' => '',),
+    ),
+    'primary key' => array('id'),
+  );
+
+  //wechat message interface table
+  $schema['wechat_api_url_req'] = array(
+    // Example (partial) specification for table "wechat hotel ranking".
+    'description' => 'for wechat api url request',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'name' => array('description' => 'url request name',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'http_method' => array('description' => 'http/https request method',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'url_req' => array('description' => 'wechat app id',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 512,
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  //wechat custom menu interface table
+  $schema['wechat_api_custom_menu'] = array(
+    'description' => 'for wechat custom menu',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'pid' => array('description' => 'parent menu id',
+                     'type' => 'int',
+                     'size' => 'tiny',
+                     'not null' => TRUE,),
+
+      'mid' => array('description' => 'menu id',
+                     'type' => 'int',
+                     'size' => 'tiny',
+                     'not null' => TRUE,),
+
+      'button' => array('description' => 'root menu',
+                     'type' => 'int',
+                     'size' => 'tiny',
+                     'not null' => TRUE,),
+
+      'sub_button' => array('description' => 'sub menu',
+                     'type' => 'int',
+                     'size' => 'tiny',
+                     'not null' => TRUE,),
+
+      'name' => array('description' => 'menu name',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 30,
+                     'not null' => TRUE,),
+
+      'type' => array('description' => 'menu type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 30,
+                     'not null' => TRUE,),
+
+      'key' => array('description' => 'click event value',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 128,
+                     'not null' => TRUE,),
+      'url' => array('description' => 'view event value',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 256,
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  //wechat custom menu interface table
+  $schema['wechat_api_custom_menu_type'] = array(
+    // Example (partial) specification for table "wechat hotel ranking".
+    'description' => 'for wechat custom menu type',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'name' => array('description' => 'menu type name',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+
+      'type' => array('description' => 'wechat menu type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  //temporary solution for wechat api custom menu
+  $schema['wechat_api_custom_menu_text'] = array(
+    'description' => 'for wechat custom menu text',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'menu_text' => array('description' => 'only description for custom menu',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 4096,
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['wechat_api_recv_event_callback'] = array(
+    'description' => 'wechat api receive event callback',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'MsgType' => array('description' => 'message type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+
+      'Event' => array('description' => 'message event',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+
+      'CallBack' => array('description' => 'callback function by message type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['wechat_api_event_statistic_table'] = array (
+    'description' => 'wechat api event statistics',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'openid' => array('description' => 'wechat user open id',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+
+      'msgtype' => array('description' => 'message type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 32,
+                     'not null' => TRUE,),
+
+      'event' => array('description' => 'message event',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 32,
+                     'not null' => TRUE,),
+
+      'eventkey' => array('description' => 'message event key',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'createtime' => array('description' => 'time of received',
+                     'type' => 'int',
+                     'size' => 'normal',
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ *
+ * It's good to clean up after ourselves
+ */
+function wechat_api_uninstall() {
+  db_drop_table('wechat_api_appid');
+  db_drop_table('wechat_api_url_req');
+  db_drop_table('wechat_api_custom_menu');
+  db_drop_table('wechat_api_custom_menu_type');
+  db_drop_table('wechat_api_custom_menu_text');
+  db_drop_table('wechat_api_recv_event_callback');
+  db_drop_table('wechat_api_event_statistic_table');
+}
+
+/**
+ *Implement hook_update_N(&$sandbox)
+ */
+function wechat_api_update_7000(&$sandbox) {
+  $schema = array();
+
+  //wechat event statistics table
+  $schema['wechat_api_event_statistic_table'] = array (
+    'description' => 'wechat api event statistics',
+    'fields' => array(
+      'id' => array('description' => 'id',
+                    'type' => 'serial',
+                    'unsigned' => TRUE,
+                    'not null' => TRUE,),
+
+      'openid' => array('description' => 'wechat user open id',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 64,
+                     'not null' => TRUE,),
+
+      'msgtype' => array('description' => 'message type',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 32,
+                     'not null' => TRUE,),
+
+      'event' => array('description' => 'message event',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 32,
+                     'not null' => TRUE,),
+
+      'eventkey' => array('description' => 'message event key',
+                     'type' => 'varchar',
+                     'size' => 'normal',
+                     'length' => 255,
+                     'not null' => TRUE,),
+
+      'createtime' => array('description' => 'time of received',
+                     'type' => 'int',
+                     'size' => 'normal',
+                     'not null' => TRUE,),
+    ),
+    'primary key' => array('id'),
+  );
+
+  db_create_table('wechat_api_event_statistic_table', $schema['wechat_api_event_statistic_table']);
+}
+
+/**
+ * Implements hook_install().
+ */
+function wechat_api_install() {
+  // Insert token, appid, appsecret into the database.
+  $rows = array(
+    array(
+      'Token' => 'y8ZTjRFivqkXtnB5u+NXxbcRq9wpDKBGg9qK4BsSknBrym3TiBbkSeJs6zxSyRB3YKbbHA//1Ph3Lzo5571egYLzG0QWRJyiLlQKR387Auk3U9UwjCSEXAngxIR/5/qFYqMwKFmt3kXyFrxcEFuqfA==',
+      'AppID' => 'coigr4DHhb1OLtyN9hxYme8M5IiJ1bamZk4+GB9iYJBB7zSHylebvwffd4YkZ6nbCJjK3CnCNhFZQQu24PHD9BU10FE8Umw8HWu9C5v5Y2c7fxudOOPWwLDseZKTOcT/x58H/dYb6Rdb5axHpbpksA==',
+      'AppSecret' => 'SGCezmi3/pS88Y8ymVm37hBveRN72w78YZZvvj+5eFotFSLjZBRALW/lLIflRaRJJncBPXf//pf6N709JMgN2emjbjVhh9aAKTTH4wAlQkrhWZR1AmRdvA9nqpzvqDi67fdz8A/kLYHjP1rIEqhvAoXVGgaYc5TN8iUmKK/prhI=',
+      'wechat_url' => t('https://dld.dreamland360.com/wechat-access-py'),
+    ),
+  );
+  if (db_table_exists('wechat_api_appid')) {
+    foreach ($rows as $row) {
+      db_insert('wechat_api_appid')->fields($row)->execute();
+    }
+  }
+
+  // Insert wechat url requests into the database.
+  $rows = array(
+    array(
+      'name' => 'get access token',
+      'http_method' => t('https请求方式: GET'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=@APPID&secret=@APPSECRET',
+    ),
+    array(
+      'name' => 'get ip server',
+      'http_method' => t('http请求方式: GET'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/getcallbackip?access_token=@ACCESS_TOKEN',
+    ),
+    array(
+      'name' => 'create menu',
+      'http_method' => t('http请求方式：POST（请使用https协议）'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=@ACCESS_TOKEN',
+    ),
+    array(
+      'name' => 'search menu',
+      'http_method' => t('http请求方式：GET'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token=@ACCESS_TOKEN',
+    ),
+    array(
+      'name' => 'delete menu',
+      'http_method' => t('http请求方式：GET'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=@ACCESS_TOKEN',
+    ),
+    array(
+      'name' => 'create QR_LIMIT_SCENE',
+      'http_method' => t('http请求方式: POST'),
+      'url_req' => 'https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=@ACCESS_TOKEN',
+    ),
+    array(
+      'name' => 'get bar code',
+      'http_method' => t('HTTP GET请求（请使用https协议） 提醒：TICKET记得进行UrlEncode'),
+      'url_req' => 'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=@TICKET',
+    ),
+  );
+
+  if (db_table_exists('wechat_api_url_req')) {
+    foreach ($rows as $row) {
+      db_insert('wechat_api_url_req')->fields($row)->execute();
+    }
+  }
+
+
+  // Insert menu type into the database.
+  $rows = array(
+    array(
+      'name' => '点击推事件',
+      'type' => 'click',
+    ),
+    array(
+      'name' => '跳转URL',
+      'type' => 'view',
+    ),
+    array(
+      'name' => '扫码推事件',
+      'type' => 'scancode_push',
+    ),
+    array(
+      'name' => '扫码推事件且弹出“消息接收中”提示框',
+      'type' => 'scancode_waitmsg',
+    ),
+    array(
+      'name' => '弹出系统拍照发图',
+      'type' => 'pic_sysphoto',
+    ),
+    array(
+      'name' => '弹出拍照或者相册发图',
+      'type' => 'pic_photo_or_album',
+    ),
+    array(
+      'name' => '弹出微信相册发图器',
+      'type' => 'pic_weixin',
+    ),
+    array(
+      'name' => '弹出地理位置选择器',
+      'type' => 'location_select',
+    ),
+  );
+  if (db_table_exists('wechat_api_custom_menu_type')) {
+    foreach ($rows as $row) {
+      db_insert('wechat_api_custom_menu_type')->fields($row)->execute();
+    }
+  }
+
+  //insert custom menu text
+  $rows = array(
+    array(
+      'menu_text' => '{
+                        "button":[
+                        {	
+                          "name":"古城导览",
+                            "sub_button":[
+                            {	
+                              "type":"view",
+                              "name":"古城概况",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/pywh"
+                            },
+                            {
+                              "type":"view",
+                              "name":"语音画册",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/yyhc"
+                            },
+                            {
+                              "type":"view",
+                              "name":"地图导览",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/dtdl"
+                            },
+                            {
+                              "type":"view",
+                              "name":"咨询服务",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/aboutus"
+                            }]
+                        },
+                        {
+                          "name":"游玩攻略",
+                            "sub_button":[
+                            {
+                              "type":"view",
+                              "name":"休闲住宿",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/xxzs"
+                            },
+                            {
+                              "type":"view",
+                              "name":"旅游线路",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/lyxl"
+                            },
+                            {	
+                              "type":"view",
+                              "name":"美食攻略",
+                              "url":"http://wechat.dreamland360.com/wechat-ajax/msgl"
+                            },
+                            {
+                              "type":"click",
+                              "name":"热门活动",
+                              "key":"menu14"
+                            }]
+                        },
+                        {
+                          "type":"view",
+                          "name":"在线商城",
+                          "url":"http://wechat.dreamland360.com/wechat-ajax/zxsc"
+                        }]
+                      }',
+    ),
+  );
+  if (db_table_exists('wechat_api_custom_menu_text')) {
+    foreach ($rows as $row) {
+      db_insert('wechat_api_custom_menu_text')->fields($row)->execute();
+    }
+  }
+
+  //insert wechat message type, event and callback function name
+  $rows = array(
+    array(
+      'MsgType' => 'event',
+      'Event' => 'subscribe',
+      'CallBack' => 'wechat_recv_event_subscribe_msg_callback',
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'unsubscribe',
+      'CallBack' => 'wechat_recv_event_unsubscribe_msg_callback',
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'CLICK',
+      'CallBack' => 'wechat_recv_event_click_msg_callback',
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'VIEW',
+      'CallBack' => 'wechat_recv_event_view_msg_callback',
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'LOCATION',
+      'CallBack' => 'wechat_recv_event_location_msg_callback', //Default receive location every 5seconds, change in mp
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'SCAN',
+      'CallBack' => 'wechat_recv_event_scan_msg_callback',
+    ),
+    array(
+      'MsgType' => 'event',
+      'Event' => 'TEMPLATESENDJOBFINISH',
+      'CallBack' => 'wechat_recv_event_template_send_job_callback',
+    ),
+    array(
+      'MsgType' => 'text',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_text_msg_callback',
+    ),
+    array(
+      'MsgType' => 'image',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_image_msg_callback',
+    ),
+    array(
+      'MsgType' => 'voice',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_voice_msg_callback',
+    ),
+    array(
+      'MsgType' => 'video',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_video_msg_callback',
+    ),
+    array(
+      'MsgType' => 'shortvideo',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_shortvideo_msg_callback',
+    ),
+    array(
+      'MsgType' => 'location',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_location_msg_callback',
+    ),
+    array(
+      'MsgType' => 'link',
+      'Event' => '',
+      'CallBack' => 'wechat_recv_link_msg_callback',
+    ),
+  );
+  if (db_table_exists('wechat_api_recv_event_callback')) {
+    foreach ($rows as $row) {
+      db_insert('wechat_api_recv_event_callback')->fields($row)->execute();
+    }
+  }
+
+}
+
+/**
+ * Implements hook_enable()
+ */
+function wechat_api_enable(){
+  if (module_exists('menu')) {
+    $menu = array(
+      'menu_name' => MENU_WECHAT_API_ADMIN,
+      'title' => t('微信API管理菜单'),
+      'description' => t('微信API后台管理菜单'),
+    );
+    menu_save($menu);
+  }
+
+  //get wechat token appid
+  if (db_table_exists('wechat_api_appid')){
+
+    $query = db_select('wechat_api_appid', 't')
+      ->fields('t', array('Token', 'AppID', 'AppSecret'))
+      ->condition('t.Token', 'q8/e98wyncjYTmyBVn5r+qyODuG9cVx3oCbSlljU860=');
+
+    $result = $query->execute();
+    foreach ($result as $row) {
+      //watchdog('wechat_api from enable', 'token is %var', array('%var' => $record->Token), WATCHDOG_DEBUG);
+      variable_set('wechat_py_Token', decrypt($row->Token));
+      variable_set('wechat_py_AppID', decrypt($row->AppID));
+      variable_set('wechat_py_AppSecret', decrypt($row->AppSecret));
+      break;
+    }
+  }
+
+  //get wechat api url requests
+  if (db_table_exists('wechat_api_url_req')){
+
+    $query = db_select('wechat_api_url_req', 't')
+      ->fields('t', array('name', 'url_req'))
+      ->orderBy('t.id', 'ASC');
+
+    $result = $query->execute();
+    foreach ($result as $record) {
+      variable_set($record->name, $record->url_req);
+    }
+  }
+ 
+  //get wechat message, event and callback function
+  if (db_table_exists('wechat_api_recv_event_callback')){
+
+    $recv_msg = array();
+    $query = db_select('wechat_api_recv_event_callback', 't')
+      ->fields('t', array('MsgType', 'Event', 'CallBack'))
+      ->orderBy('t.id', 'ASC');
+    $result = $query->execute();
+    foreach ($result as $row) {
+      if($row->Event === ''){
+        $recv_msg[$row->MsgType] = $row->CallBack;
+      }else{
+        $recv_msg[$row->MsgType][$row->Event] = $row->CallBack;
+      }
+    }
+    variable_set('wechat_recv_msg', $recv_msg);
+  }
+}
+
+/**
+ * End of wechat api module
+ */
