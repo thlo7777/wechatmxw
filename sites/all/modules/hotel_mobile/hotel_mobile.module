@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * hook_permission()
+ */
+function hotel_mobile_permission() {
+  return array(
+    'hotel mobile module permission' => array(
+      'title' => t('客栈模块'),
+      'description' => t('微信客栈功能'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function hotel_mobile_menu(){
+}
+
+
+/**
+ * End of wechat asset module
+ */

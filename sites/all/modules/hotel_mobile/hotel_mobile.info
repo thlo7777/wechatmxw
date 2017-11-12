@@ -1,0 +1,4 @@
+name = hotel mobile module
+description = 微信客栈模块
+core = 7.x
+

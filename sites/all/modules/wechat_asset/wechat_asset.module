@@ -1,0 +1,211 @@
+<?php
+
+define('LOGIN_QRCODE_RAND_MAX', 100000);
+define('QRCODE_SUBSCRIBE_PREFIX', 'qrscene_');
+define('OAUTH2_STATE', '100');
+
+
+/**
+ * Baidu map js api
+ */
+define('BD_AMAP_JS_KEY', 'HzeYY8ADmORLyqfZey5Z042awEvo4VFD');
+define('BD_AMAP_JS_REST_API', 'https://api.map.baidu.com/api?v=2.0');
+
+/**
+ * amap js api
+ */
+define('AMAP_JS_KEY', 'cd09ada094d922e6129c7a1455e719be');
+define('AMAP_JS_REST_API', 'https://webapi.amap.com/maps?v=1.4.1');
+define('AMAP_UI_COMPONENTS', 'https://webapi.amap.com/ui/1.0/main.js');
+
+/**
+ * wechat js url
+ */
+define('WECHAT_JS', 'https://res.wx.qq.com/open/js/jweixin-1.2.0.js');
+
+/**
+ * hook_permission()
+ */
+function wechat_asset_permission() {
+  return array(
+    'wechat asset module permission' => array(
+      'title' => t('Access wechat asset module'),
+      'description' => t('包好微信开发的所有CSS JS 和常量等公共资源'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+//function wechat_access_menu(){
+    //nothing  
+//}
+
+/**
+ * hook_css_array()
+ * @return
+ * common css
+ **/
+function wechat_asset_css_array() {
+    global $base_url;
+    return array (
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/css/bootstrap.min.css',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/css/material-design-iconic-font.min.css',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/css/jquery-confirm.min.css',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/css/loading_gif.css',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/css/progressBar.css'
+    );
+}
+
+/**
+ * hook_base_js_array()
+ * @return
+ * only bootstrap and jquery 
+ **/
+function wechat_asset_base_js_array() {
+    global $base_url;
+    return array (
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery-3.2.1.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/bootstrap.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery.ajax-retry.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery-confirm.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/mobile_plugin_api.js',
+    );
+}
+/**
+ * hook_js_map_array()
+ * @return
+ * common js 
+ **/
+function wechat_asset_js_map_array() {
+    global $base_url;
+    return array (
+        AMAP_JS_REST_API . '&key=' . AMAP_JS_KEY,   //amap javascript api
+        AMAP_UI_COMPONENTS, //amap UI components
+        WECHAT_JS,
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery-3.2.1.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/bootstrap.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery.ajax-retry.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery-confirm.min.js',
+        $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/mobile_plugin_api.js',
+    );
+}
+
+/**
+ * hook_subscribe_user($postArray)
+ **/
+function wechat_asset_subscribe_user($postArray) {
+
+    $openID = $postArray['FromUserName'];
+    $md5ID = md5($openID);
+
+    //create user and wechat profile
+    $uid = wechat_asset_check_userid_exists($openID);
+    if ( !$uid ) {    //new user
+        //set up the user fields
+        $fields = array(
+            'name' => 'tmp_' . $md5ID,
+            'mail' => 'tmp@example.com',
+            'pass' => strrev($md5ID),
+            'status' => 1,
+            'init' => 'email address',
+            'signature_format' => 'full_html',
+            'timezone' => date_default_timezone()
+            //'roles' => array(DRUPAL_AUTHENTICATED_RID => TRUE), //authenticated user
+        );
+
+        $fields['field_wechat_openid'][LANGUAGE_NONE][0]['value'] = $openID;
+        $fields['field_openid_md5'][LANGUAGE_NONE][0]['value'] = $md5ID;
+        $fields['field_wechat_subscribe'][LANGUAGE_NONE][0]['value'] = '1';  //from wechat subscribe
+        $fields['field_subscribe_time'][LANGUAGE_NONE][0]['value'] = time();  //from wechat subscribe time
+
+        //the first parameter is left blank so a new user is created
+        $account = user_save('', $fields);
+        if ( !$account ) {
+            watchdog(__FUNCTION__,
+                'Can not create user for open id = @openid',
+                array('@openid' => $openID),
+                $severity = WATCHDOG_ERROR
+            );
+            return NULL;
+        }
+
+    } else {    //old user change subscribe
+        $wrapper = entity_metadata_wrapper('user', $uid);  //use foreach for entity_load
+        $wrapper->field_wechat_subscribe->set(1); //change to subscribe
+    }
+
+}
+
+/**
+ * hook_check_userid_exists($openID = "", $md5ID = "")
+ **/
+function wechat_asset_check_userid_exists($openID = "", $md5ID = "") {
+
+    if ($openID == "" && $md5ID == "") {
+        watchdog(__FUNCTION__, ' openID and md5ID all empty', $severity = WATCHDOG_ERROR);
+        return null;
+    }
+
+    $query = new EntityFieldQuery();
+
+    if ( !empty($openID) ) {
+        $results = $query->entityCondition('entity_type', 'user')
+            ->fieldCondition('field_wechat_openid', 'value', $openID, '=')
+            ->execute();
+
+        if (empty($results)) {
+              return null;     //can't find user account, ok
+        }
+    } else {
+        $results = $query->entityCondition('entity_type', 'user')
+            ->fieldCondition('field_openid_md5', 'value', $md5ID, '=')
+            ->execute();
+
+        if (empty($results)) {
+              return null;     //can't find user account, ok
+        }
+    }
+
+    if (count($results['user']) == 1) {
+        $tmp = current($results['user']);
+        return $tmp->uid;   //ok
+    }
+
+    if (count($results['user']) > 1) {
+        watchdog(__FUNCTION__, 'check_userid_exists. Have multiple user account at @line in @filename',
+            array(
+                '@line' => __LINE__,
+                '@filename' => __FILE__,
+            ),
+            $severity = WATCHDOG_ERROR
+        );
+        exit('found open id has multiple user account');    //critical error, shut down php script
+    }
+
+    return null;
+}
+
+/**
+ * hook_check_openid_exists($uid)
+ **/
+function wechat_asset_check_openid_exists($uid) {
+
+    if ($uid == '' || $uid == null) {
+        return null;
+    }
+
+    $wrapper = entity_metadata_wrapper('user', $uid);  //use foreach for entity_load
+
+    $openid = $wrapper->field_wechat_openid->value();
+    if (empty($openid) || $openid == '' || $openid == null) {
+        return null;
+    }
+
+    return $openid;
+}
+
+/**
+ * End of wechat asset module
+ */

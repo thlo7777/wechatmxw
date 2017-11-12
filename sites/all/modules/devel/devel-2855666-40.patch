@@ -1,0 +1,287 @@
+diff --git a/devel.module b/devel.module
+index 4ad4604..6aca8eb 100644
+--- a/devel.module
++++ b/devel.module
+@@ -467,7 +467,12 @@ function devel_set_message($msg, $type = NULL) {
+ function has_krumo() {
+   @include_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'devel') . '/krumo/class.krumo.php';
+   if (function_exists('krumo') && !drupal_is_cli()) {
+-    drupal_add_js(drupal_get_path('module', 'devel') . '/devel_krumo_path.js');
++    drupal_add_js(drupal_get_path('module', 'devel') . '/devel_krumo.js');
++    drupal_add_css(drupal_get_path('module', 'devel') . '/devel_krumo.css');
++    // If dpm() is called after status messages have been rendered they will
++    // instead appear on the next page load, so ensure the krumo CSS and
++    // Javascript files are included.
++    krumo::addCssJs();
+     return TRUE;
+   }
+   return FALSE;
+diff --git a/devel_krumo.css b/devel_krumo.css
+new file mode 100644
+index 0000000..97018fd
+--- /dev/null
++++ b/devel_krumo.css
+@@ -0,0 +1,11 @@
++/**
++ * Krumo
++ */
++.krumo-version,
++.krumo-call {
++  white-space: nowrap;
++}
++
++.krumo-nest {
++  display: none;
++}
+diff --git a/devel_krumo.js b/devel_krumo.js
+new file mode 100644
+index 0000000..645a525
+--- /dev/null
++++ b/devel_krumo.js
+@@ -0,0 +1,77 @@
++(function ($) {
++
++/**
++ * Attaches double-click behavior to toggle full path of Krumo elements.
++ */
++Drupal.behaviors.devel = {
++  attach: function (context, settings) {
++
++    // Path
++    // Add hint to footnote
++    $('.krumo-footnote .krumo-call', context).once().before('<img style="vertical-align: middle;" title="Click to expand. Double-click to show path." src="' + settings.basePath + 'misc/help.png"/>');
++
++    var krumo_name = [];
++    var krumo_type = [];
++
++    function krumo_traverse(el) {
++      krumo_name.push($(el).html());
++      krumo_type.push($(el).siblings('em').html().match(/\w*/)[0]);
++
++      if ($(el).closest('.krumo-nest').length > 0) {
++        krumo_traverse($(el).closest('.krumo-nest').prev().find('.krumo-name'));
++      }
++    }
++
++    $('.krumo-child > div:first-child', context).dblclick(
++      function(e) {
++        if ($(this).find('> .krumo-php-path').length > 0) {
++          // Remove path if shown.
++          $(this).find('> .krumo-php-path').remove();
++        }
++        else {
++          // Get elements.
++          krumo_traverse($(this).find('> a.krumo-name'));
++
++          // Create path.
++          var krumo_path_string = '';
++          for (var i = krumo_name.length - 1; i >= 0; --i) {
++            // Start element.
++            if ((krumo_name.length - 1) == i)
++              krumo_path_string += '$' + krumo_name[i];
++
++            if (typeof krumo_name[(i-1)] !== 'undefined') {
++              if (krumo_type[i] == 'Array') {
++                krumo_path_string += "[";
++                if (!/^\d*$/.test(krumo_name[(i-1)]))
++                  krumo_path_string += "'";
++                krumo_path_string += krumo_name[(i-1)];
++                if (!/^\d*$/.test(krumo_name[(i-1)]))
++                  krumo_path_string += "'";
++                krumo_path_string += "]";
++              }
++              if (krumo_type[i] == 'Object')
++                krumo_path_string += '->' + krumo_name[(i-1)];
++            }
++          }
++          $(this).append('<div class="krumo-php-path" style="font-family: Courier, monospace; font-weight: bold;">' + krumo_path_string + '</div>');
++
++          // Reset arrays.
++          krumo_name = [];
++          krumo_type = [];
++        }
++      }
++    );
++
++    // Events
++    $('.krumo-element')
++      .click(function() {
++        krumo.toggle(this);
++      }).mouseover(function() {
++        krumo.over(this);
++      }).mouseout(function() {
++        krumo.out(this);
++      });
++  }
++};
++
++})(jQuery);
+diff --git a/devel_krumo_path.js b/devel_krumo_path.js
+deleted file mode 100644
+index 15e25d9..0000000
+--- a/devel_krumo_path.js
++++ /dev/null
+@@ -1,66 +0,0 @@
+-(function ($) {
+-
+-/**
+- * Attaches double-click behavior to toggle full path of Krumo elements.
+- */
+-Drupal.behaviors.devel = {
+-  attach: function (context, settings) {
+-
+-    // Add hint to footnote
+-    $('.krumo-footnote .krumo-call', context).once().before('<img style="vertical-align: middle;" title="Click to expand. Double-click to show path." src="' + settings.basePath + 'misc/help.png"/>');
+-
+-    var krumo_name = [];
+-    var krumo_type = [];
+-
+-    function krumo_traverse(el) {
+-      krumo_name.push($(el).html());
+-      krumo_type.push($(el).siblings('em').html().match(/\w*/)[0]);
+-
+-      if ($(el).closest('.krumo-nest').length > 0) {
+-        krumo_traverse($(el).closest('.krumo-nest').prev().find('.krumo-name'));
+-      }
+-    }
+-
+-    $('.krumo-child > div:first-child', context).dblclick(
+-      function(e) {
+-        if ($(this).find('> .krumo-php-path').length > 0) {
+-          // Remove path if shown.
+-          $(this).find('> .krumo-php-path').remove();
+-        }
+-        else {
+-          // Get elements.
+-          krumo_traverse($(this).find('> a.krumo-name'));
+-
+-          // Create path.
+-          var krumo_path_string = '';
+-          for (var i = krumo_name.length - 1; i >= 0; --i) {
+-            // Start element.
+-            if ((krumo_name.length - 1) == i)
+-              krumo_path_string += '$' + krumo_name[i];
+-
+-            if (typeof krumo_name[(i-1)] !== 'undefined') {
+-              if (krumo_type[i] == 'Array') {
+-                krumo_path_string += "[";
+-                if (!/^\d*$/.test(krumo_name[(i-1)]))
+-                  krumo_path_string += "'";
+-                krumo_path_string += krumo_name[(i-1)];
+-                if (!/^\d*$/.test(krumo_name[(i-1)]))
+-                  krumo_path_string += "'";
+-                krumo_path_string += "]";
+-              }
+-              if (krumo_type[i] == 'Object')
+-                krumo_path_string += '->' + krumo_name[(i-1)];
+-            }
+-          }
+-          $(this).append('<div class="krumo-php-path" style="font-family: Courier, monospace; font-weight: bold;">' + krumo_path_string + '</div>');
+-
+-          // Reset arrays.
+-          krumo_name = [];
+-          krumo_type = [];
+-        }
+-      }
+-    );
+-  }
+-};
+-
+-})(jQuery);
+diff --git a/krumo/class.krumo.php b/krumo/class.krumo.php
+index 499eb3e..88249dc 100644
+--- a/krumo/class.krumo.php
++++ b/krumo/class.krumo.php
+@@ -656,6 +656,15 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
+   // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+ 
+   /**
++  * Allows CSS and Javascript to be included without performing a krumo::dump().
++  */
++  Public Static Function addCssJs() {
++    return krumo::_css();
++  }
++
++  // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
++
++  /**
+   * Print the skin (CSS)
+   *
+   * @return boolean
+@@ -705,25 +714,8 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
+ 
+       // the CSS
+       //
+-      ?>
+-<!-- Using Krumo Skin: <?php echo preg_replace('~^' . preg_quote(realpath(KRUMO_DIR) . DIRECTORY_SEPARATOR) . '~Uis', '', realpath($_));?> -->
+-<style type="text/css">
+-<!--/**/
+-<?php echo $css?>
+-
+-/**/-->
+-</style>
+-<?php
+-      // the JS
+-      //
+-      ?>
+-<script type="text/javascript">
+-<!--//
+-<?php echo join(file(KRUMO_DIR . "krumo.js"));?>
+-
+-//-->
+-</script>
+-<?php
++      drupal_add_css($css, 'inline');
++      drupal_add_js(join(file(KRUMO_DIR . "krumo.js")), 'inline');
+       }
+ 
+     return $_css;
+@@ -1068,10 +1060,7 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
+ ?>
+ <li class="krumo-child">
+ 
+-  <div class="krumo-element<?php echo count($data) > 0 ? ' krumo-expand' : '';?>"
+-    <?php if (count($data) > 0) {?> onClick="krumo.toggle(this);"<?php } ?>
+-    onMouseOver="krumo.over(this);"
+-    onMouseOut="krumo.out(this);">
++  <div class="krumo-element<?php echo count($data) > 0 ? ' krumo-expand' : '';?>">
+ 
+       <?php /* DEVEL: added htmlSpecialChars */ ?>
+       <a class="krumo-name"><?php echo htmlSpecialChars($name);?></a>
+@@ -1120,10 +1109,7 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
+ ?>
+ <li class="krumo-child">
+ 
+-  <div class="krumo-element<?php echo count($data) > 0 ? ' krumo-expand' : '';?>"
+-    <?php if (count($data) > 0) {?> onClick="krumo.toggle(this);"<?php } ?>
+-    onMouseOver="krumo.over(this);"
+-    onMouseOut="krumo.out(this);">
++  <div class="krumo-element<?php echo count($data) > 0 ? ' krumo-expand' : '';?>">
+ 
+       <?php /* DEVEL: added htmlSpecialChars */ ?>
+       <a class="krumo-name"><?php echo htmlSpecialChars($name);?></a>
+@@ -1273,10 +1259,7 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
+ ?>
+ <li class="krumo-child">
+ 
+-  <div class="krumo-element<?php echo $_extra ? ' krumo-expand' : '';?>"
+-    <?php if ($_extra) {?> onClick="krumo.toggle(this);"<?php } ?>
+-    onMouseOver="krumo.over(this);"
+-    onMouseOut="krumo.out(this);">
++  <div class="krumo-element<?php echo $_extra ? ' krumo-expand' : '';?>">
+ 
+       <?php /* DEVEL: added htmlSpecialChars */ ?>
+       <a class="krumo-name"><?php echo htmlSpecialChars($name);?></a>
+diff --git a/krumo/krumo.js b/krumo/krumo.js
+index 84a926e..10631ee 100644
+--- a/krumo/krumo.js
++++ b/krumo/krumo.js
+@@ -54,7 +54,7 @@ krumo.toggle = function(el) {
+   var ul = el.parentNode.getElementsByTagName('ul');
+   for (var i=0; i<ul.length; i++) {
+     if (ul[i].parentNode.parentNode == el.parentNode) {
+-      ul[i].parentNode.style.display = (ul[i].parentNode.style.display == 'none')
++      ul[i].parentNode.style.display = (window.getComputedStyle(ul[i].parentNode).display == 'none')
+         ? 'block'
+         : 'none';
+       }

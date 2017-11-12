@@ -3,36 +3,35 @@
 /**
  * Implment php5 curl api to get https url
  */
-function wechat_php_curl_https_get($url, $h = false) 
-{
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $url);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-  // Edit: prior variable $postFields should be $postfields;
-  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-  if($h){
-    //include header information
-    curl_setopt($ch, CURLOPT_HEADER, true); 
-  }
+function wechat_php_curl_https_get($url, $h = false) {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    // Edit: prior variable $postFields should be $postfields;
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    if($h){
+      //include header information
+      curl_setopt($ch, CURLOPT_HEADER, true); 
+    }
 
-  $result = curl_exec($ch);
-  if(curl_errno($ch))
-  {
-    curl_close($ch);
-    return NULL;
-  }
-
-  if($h){
-    if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == '200') {
-        return $result;
-    }else{
+    $result = curl_exec($ch);
+    if(curl_errno($ch))
+    {
+      curl_close($ch);
       return NULL;
     }
-  }
 
-  curl_close($ch);
-  return $result;
+    if($h){
+      if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == '200') {
+          return $result;
+      }else{
+        return NULL;
+      }
+    }
+
+    curl_close($ch);
+    return $result;
 }
 
 /**
@@ -75,7 +74,6 @@ function wechat_php_curl_https_post($url, $postfields, $ct = '')
   curl_close($ch);
   return $result;
 }
-
 
 /**
  * End of php5_api.inc

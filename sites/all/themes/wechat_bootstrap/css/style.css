@@ -1,3 +1,6 @@
 /**
  * Place your custom styles here.
  */
+#admin-menu {
+    z-index: 9999;
+}

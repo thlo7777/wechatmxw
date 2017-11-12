@@ -1,0 +1,4 @@
+name = wechat resource
+description = 微信模块所有资源(CSS/JS,常量).
+core = 7.x
+

@@ -1,0 +1,4 @@
+name = wechat debug and test code 
+description = 微信调试／测试模块.
+core = 7.x
+

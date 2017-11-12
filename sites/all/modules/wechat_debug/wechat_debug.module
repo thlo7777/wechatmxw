@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * hook_permission()
+ */
+function wechat_debug_permission() {
+  return array(
+    'wechat debug module' => array(
+      'title' => t('微信调试／测试模块'),
+      'description' => t('只有管理员可以访问'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu()
+ */
+function wechat_debug_menu() {
+  $items = array();
+
+  $items['wechat-debug/form-utility'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => "main-menu",
+    'title' => '微信调试-测试',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wechat_debug_form_utility_form'),
+    'description' => t('form 测试页面'),
+    'access callback' => 'user_access',
+    'access arguments' => array('wechat debug module'),
+    'file' => 'wechat_debug_form_utility_form.inc',
+    'weight' => 0,
+  );
+
+  return $items;
+}
+
+
+/**
+ * End of wechat_debug module
+ */
+
