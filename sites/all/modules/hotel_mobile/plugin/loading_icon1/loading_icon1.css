@@ -1,0 +1,13 @@
+.loader-on {
+    display: block;
+    position: fixed;
+    z-index: 9999;
+    background-image: url("preloading_gif");
+    width: 64px;
+    height: 64px;
+}
+
+.loader-off {
+    display: none;
+}
+

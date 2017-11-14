@@ -164,6 +164,28 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 
   );
 
+
+    $scheme = variable_get('file_default_scheme', 'public') . '://';
+
+    $ticket = module_invoke('wechat_api', 'creat_qrscene', FALSE, '198964', 3600);
+    if( !$ticket ) {
+        drupal_set_message(t('创建临时二维码失败.'), 'error');
+        return $form;
+    }
+    $qrCodeImage = module_invoke('wechat_api', 'get_qrscene_image', '198964', $ticket);
+    $leaflet_image = array(
+        '#theme' => 'image',
+        '#path' => file_create_url($qrCodeImage),
+        '#width' => '300',
+    );
+    $form['test_qrcode']['leaflet_image'] = array(
+        '#markup' => '<h3>QRCODE 198964</h3>' .
+                     '<a href="' . file_create_url($qrCodeImage) . '" target="_blank class="example-img">' .
+                          drupal_render($leaflet_image) . '</a>'
+    );
+
+    $menu = module_invoke('wechat_api', 'search_custom_menu');
+    dpm($menu);
   
 //  $serialized_text = encrypt('1233702402');
 //  dpm($serialized_text);
@@ -477,13 +499,32 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 //    dpm($element);
 
 
-    $scheme = variable_get('file_default_scheme', 'public') . '://';
-    $dir_path = drupal_realpath($scheme . 'tttt');
+    //$dir_path = drupal_realpath($scheme . 'tttt');
+    $dir_path = drupal_realpath(QRCODE_IMAGE_PATH);
     //mkdir($dir_path);
+    $field_instances = field_info_instances('node', 'hotel_main_page');
+    dpm($field_instances);
+    $field_instances = field_info_instances('node', 'hotel_facilities_page');
+    dpm($field_instances);
 
-    dpm(AMAP_UI_COMPONENTS);
+    $all_fields_on_my_website = field_info_fields();
+    $allowed_values= list_allowed_values($all_fields_on_my_website["field_hotel_pay_service"]);
+    //$list = list_allowed_values('field_hotel_hot_water');
+    dpm($allowed_values);
 
-    dpm(module_invoke('wechat_asset', 'base_js_array'));
+
+    class foo
+    {
+        function do_foo()
+        {
+            return "Doing foo."; 
+        }
+    }
+
+    $bar = new foo;
+    $str = "do_foo";
+    dpm($bar->{$str}());
+    //dpm(module_invoke('wechat_asset', 'base_js_array'));
 //    $block = module_invoke('wechat_api', 'test_value', 'fuck', 'me');
 //    $save_path = drupal_realpath($scheme . SUPERMARKET_PATH);
 //

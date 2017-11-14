@@ -24,6 +24,26 @@ define('AMAP_UI_COMPONENTS', 'https://webapi.amap.com/ui/1.0/main.js');
 define('WECHAT_JS', 'https://res.wx.qq.com/open/js/jweixin-1.2.0.js');
 
 /**
+ * wechat mobile url for all mobile module
+ **/
+define('WECHAT_MOBILE_URL', 'wechat-mobile');
+
+/**
+ * define inline js
+ **/
+define('MOBILE_INLINE_JS', '
+    function isMobile() {
+        try{ document.createEvent("TouchEvent"); return true; }
+        catch(e){ return false; }
+    }
+
+    if (!isMobile()) {
+        //window.location.replace("https://dld.dreamland360.com/content/403-拒绝访问");
+    }
+    '
+);
+
+/**
  * hook_permission()
  */
 function wechat_asset_permission() {
@@ -38,9 +58,18 @@ function wechat_asset_permission() {
 /**
  * Implements hook_menu()
  */
-//function wechat_access_menu(){
-    //nothing  
-//}
+function wechat_asset_menu(){
+    //wechat js sdk api for all module
+    $items[WECHAT_MOBILE_URL . '/wechat-js-sdk-config'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('wechat js configure api'),
+        'page callback' => 'wechat_js_sdk_config',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'wechat_js_sdk_config.inc'
+    );
+
+    return $items;
+}
 
 /**
  * hook_css_array()
@@ -117,7 +146,7 @@ function wechat_asset_subscribe_user($postArray) {
 
         $fields['field_wechat_openid'][LANGUAGE_NONE][0]['value'] = $openID;
         $fields['field_openid_md5'][LANGUAGE_NONE][0]['value'] = $md5ID;
-        $fields['field_wechat_subscribe'][LANGUAGE_NONE][0]['value'] = '1';  //from wechat subscribe
+        $fields['field_wechat_subscribe'][LANGUAGE_NONE][0]['value'] = 1;  //from wechat subscribe
         $fields['field_subscribe_time'][LANGUAGE_NONE][0]['value'] = time();  //from wechat subscribe time
 
         //the first parameter is left blank so a new user is created
@@ -131,9 +160,39 @@ function wechat_asset_subscribe_user($postArray) {
             return NULL;
         }
 
+        return $account->uid;
+
     } else {    //old user change subscribe
         $wrapper = entity_metadata_wrapper('user', $uid);  //use foreach for entity_load
         $wrapper->field_wechat_subscribe->set(1); //change to subscribe
+        $wrapper->save();
+        return $uid;
+    }
+
+}
+
+/**
+ * hook_unsubscribe_user($postArray)
+ **/
+function wechat_asset_unsubscribe_user($postArray) {
+
+    $openID = $postArray['FromUserName'];
+    $time = $postArray['CreateTime'];
+
+    //create user and wechat profile
+    $uid = wechat_asset_check_userid_exists($openID);
+    if ( $uid ) {    //find user
+        $wrapper = entity_metadata_wrapper('user', $uid);  //use foreach for entity_load
+        $wrapper->field_wechat_subscribe->set(0); //change to unsubscribe
+        $wrapper->field_unsubscribe_time->set($time); //set to unsubscribe time
+        $wrapper->save();
+
+    } else {
+        watchdog(__FUNCTION__,
+            'Can not unsubscribe user for open id = @openid',
+            array('@openid' => $openID),
+            $severity = WATCHDOG_ERROR
+        );
     }
 
 }
@@ -205,6 +264,100 @@ function wechat_asset_check_openid_exists($uid) {
 
     return $openid;
 }
+
+/**
+ * hook call for hook_wechat_welcome_news($postArray)
+ **/
+function wechat_asset_wechat_welcome_news($postArray) {
+
+/**
+ *  $query = new EntityFieldQuery();
+
+    $query->entityCondition('entity_type', 'node')
+        ->entityCondition('bundle', 'dld_welcome_page')
+        ->propertyCondition('status', NODE_PUBLISHED);
+
+    $result = $query->execute();
+
+    $items = array();
+    if (!empty($result)) {
+
+        foreach ($result['node'] as $nid => $node) {
+            $node_wrapper = entity_metadata_wrapper('node', $nid);
+            $item_ref = $node_wrapper->field_article_entity_ref->value();
+            foreach ($item_ref as $key => $ref_node) {
+                $item_wrapper = entity_metadata_wrapper('node', $ref_node->nid);
+                $items[$key]['Title'] = $item_wrapper->title->value();
+                $items[$key]['Description'] = $item_wrapper->field_article_description->value();
+                $items[$key]['PicUrl'] = file_create_url($item_wrapper->field_articl_pic_url->value()['uri']);
+                $items[$key]['Url'] = $item_wrapper->field_article_url->value();
+            }
+        }
+
+        $xml_header =
+           '<ToUserName><![CDATA[%s]]></ToUserName>
+           <FromUserName><![CDATA[%s]]></FromUserName>
+           <CreateTime>%s</CreateTime>
+           <MsgType><![CDATA[news]]></MsgType>
+           <ArticleCount>%s</ArticleCount>
+           <Articles>';
+
+        $item_tpl =
+            '<item>
+            <Title><![CDATA[%s]]></Title>
+            <Description><![CDATA[%s]]></Description>
+            <PicUrl><![CDATA[%s]]></PicUrl>
+            <Url><![CDATA[%s]]></Url>
+            </item>';
+
+        $item_str = '';
+        foreach ($items as $key => $item) {
+            $item_str .= sprintf($item_tpl, $item['Title'], $item['Description'], $item['PicUrl'], $item['Url']);
+        }
+
+        $ToUserName = $postArray['FromUserName']; //user open id
+        $FromUserName = $postArray['ToUserName'];//wechat server id
+        $time = time();
+        $header = sprintf($xml_header, $ToUserName, $FromUserName, $time, count($items));
+
+        $result = '<xml>' . $header . $item_str . '</Articles></xml>';
+
+    } else {
+ **/
+
+    //no welcome node
+    $xml_header = '
+    <ToUserName><![CDATA[%s]]></ToUserName>
+    <FromUserName><![CDATA[%s]]></FromUserName>
+    <CreateTime>%s</CreateTime>
+    <MsgType><![CDATA[text]]></MsgType>
+    <Content><![CDATA[%s]]></Content>
+    ';
+
+    $ToUserName = $postArray['FromUserName']; //user open id
+    $FromUserName = $postArray['ToUserName'];//wechat server id
+    $time = time();
+    $header = sprintf($xml_header, $ToUserName, $FromUserName, $time, '欢迎加入梦乡网!');
+
+    return $result = '<xml>' . $header . '</xml>';
+}
+
+/**
+ * Implement hook_scan_subscribe_event($eventKey, $postArray)
+ **/
+function wechat_asset_scan_subscribe_event($eventKey, $postArray) {
+
+    watchdog(__FUNCTION__, '$eventKey @data', array('@data' => $eventKey));
+
+    return '';  //if return 'next', then other following module hook will stop
+}
+/**
+ * Implements hook_scan_msg_event($eventkey, $postArray)
+ **/
+function wechat_asset_scan_msg_event($eventkey, $postArray) {
+    watchdog(__FUNCTION__, '$eventKey <pre>@data</pre>', array('@data' => print_r($eventkey, TRUE)));
+}
+ 
 
 /**
  * End of wechat asset module

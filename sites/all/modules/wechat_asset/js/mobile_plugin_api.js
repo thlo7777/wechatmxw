@@ -362,7 +362,7 @@
     $.extend({
 
         set_wx_config : function() {
-            var path = window.location.origin + "/wechat-mobile/jsapi-config";
+            var path = window.location.origin + "/wechat-mobile/wechat-js-sdk-config";
             var url = window.location.href;     // Returns full URL
             //console.log(window.location);
             //1. get signpackage from server by ajax
@@ -574,16 +574,16 @@
             });
         },
 
-        //dld ajax interface
-        dld_ajax_submit: function(ajax_type, json_data, target_page, call_back, fun_name) {
+        //wechat ajax interface
+        wechat_ajax_submit: function(ajax_type, json_data, target_page, call_back, fun_name, rest_url) {
 
-            base_url = 'https://dld.dreamland360.com/menu-dld-restful/dld-restful-api';
+            barse_url = window.location.origin + "/" + rest_url;
 
             if (ajax_type == "GET") {
                 request = $.ajax({
                     cache: false,
                     headers: { "cache-control": "no-cache" },
-                    url: base_url,
+                    url: barse_url,
                     method: "GET",
                     data: {data: json_data} //for GET
                 });
@@ -591,7 +591,7 @@
                 request = $.ajax({
                     cache: false,
                     headers: { "cache-control": "no-cache" },
-                    url: base_url,
+                    url: barse_url,
                     method: "POST",
                     data: JSON.stringify(json_data),  //for POST
                 });
@@ -624,7 +624,7 @@
         },
 
         //calculates the distance between two points (given the latitude/longitude of those points).
-        dld_gps_distance: function(lng1, lat1, lng2, lat2) {
+        wechat_gps_distance: function(lng1, lat1, lng2, lat2) {
 
             var radlat1 = Math.PI * parseFloat(lat1)/180
             var radlat2 = Math.PI * parseFloat(lat2)/180

@@ -1,23 +1,71 @@
 <?php
 
+define('HOTEL_CONTENT_PATH', 'public://hotel_mobile/');
+
 /**
  * hook_permission()
  */
 function hotel_mobile_permission() {
-  return array(
-    'hotel mobile module permission' => array(
-      'title' => t('客栈模块'),
-      'description' => t('微信客栈功能'),
-    ),
-  );
+    return array(
+        'hotel mobile module permission' => array(
+            'title' => t('客栈模块'),
+            'description' => t('微信客栈功能')
+        )
+    );
 }
 
 /**
  * Implements hook_menu()
  */
 function hotel_mobile_menu(){
+
+    $items[WECHAT_MOBILE_URL . '/hotel-mobile-rest'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('wechat js configure api'),
+        'page callback' => 'hotel_rest_api',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_rest_api.inc'
+    );
+
+    $items[WECHAT_MOBILE_URL . '/hotel-create-page'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('新建客栈页面'),
+        'page callback' => 'hotel_create_page',
+        'delivery callback' => 'deliver_hotel_create_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_create_page.inc'
+    );
+
+    $items[WECHAT_MOBILE_URL . '/hotel-create-leaf-page'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('新建客栈页面'),
+        'page callback' => 'hotel_create_page',
+        'delivery callback' => 'deliver_hotel_create_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_create_page.inc'
+    );
+
+    return $items;
 }
 
+/**
+ * Implements hook_theme().
+ */
+function hotel_mobile_theme() {
+
+    return array (
+        // define dld-mobile-sk-home-page.tpl.php inside module
+        'hotel_create_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        )
+    );
+}
 
 /**
  * End of wechat asset module
