@@ -27,6 +27,34 @@ function hotel_mobile_menu(){
         'file' => 'hotel_rest_api.inc'
     );
 
+    $items[WECHAT_MOBILE_URL . '/hotel-home-page'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('店主之家'),
+        'page callback' => 'hotel_home_page',
+        'delivery callback' => 'deliver_hotel_home_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_home_page.inc'
+    );
+
+    $items[WECHAT_MOBILE_URL . '/hotel-list-page'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('店铺列表'),
+        'page callback' => 'hotel_list_page',
+        'delivery callback' => 'deliver_hotel_list_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_list_page.inc'
+    );
+
+    $items[WECHAT_MOBILE_URL . '/hotel-edit-page/%/edit'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('店铺列表'),
+        'page callback' => 'hotel_edit_page',
+        'page arguments' => array(2),   //node id
+        'delivery callback' => 'deliver_hotel_edit_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_edit_page.inc'
+    );
+
     $items[WECHAT_MOBILE_URL . '/hotel-create-page'] = array(
         'type' => MENU_CALLBACK,
         'description' => t('新建客栈页面'),
@@ -38,11 +66,12 @@ function hotel_mobile_menu(){
 
     $items[WECHAT_MOBILE_URL . '/hotel-create-leaf-page'] = array(
         'type' => MENU_CALLBACK,
-        'description' => t('新建客栈页面'),
-        'page callback' => 'hotel_create_page',
-        'delivery callback' => 'deliver_hotel_create_page_html',
+        'description' => t('生成宣传页'),
+        'page callback' => 'hotel_create_leaf_page',
+        'page arguments' => array(2),   //node id
+        'delivery callback' => 'deliver_hotel_create_leaf_page_html',
         'access callback' => TRUE,  //anyone can access by ajax
-        'file' => 'hotel_create_page.inc'
+        'file' => 'hotel_create_leaf_page.inc'
     );
 
     return $items;
@@ -54,8 +83,51 @@ function hotel_mobile_menu(){
 function hotel_mobile_theme() {
 
     return array (
+
+        // define dld-mobile-sk-home-page.tpl.php inside module
+        'hotel_home_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
+        'hotel_list_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
+        'hotel_edit_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
         // define dld-mobile-sk-home-page.tpl.php inside module
         'hotel_create_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
+        // define dld-mobile-sk-home-page.tpl.php inside module
+        'hotel_create_leaf_page' => array(
             'template' => 'tpl/hotel-page-tpl',
             'variables' => array(
                 'head_title' => null,

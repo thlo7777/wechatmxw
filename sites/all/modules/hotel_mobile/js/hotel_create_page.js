@@ -1,12 +1,5 @@
 (function($) {
 
-    var hotel_info = {
-        latitude: 0,
-        longitude: 0,
-        address: "",
-        name: "",
-    };
-
     console.log(jsObj);
 
     //$(document).config_wechat_only_location_api();

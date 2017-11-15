@@ -31,6 +31,12 @@ function hotel_rest_api() {
     if ($data['type'] == 'hotel_update_form') {
         $send_data = hotel_update_node($data);
     } 
+    if ($data['type'] == 'all_list_count') {
+        $send_data = get_node_list_count($data);
+    } 
+    if ($data['type'] == 'get_list_pager') {
+        $send_data = get_node_list_pager($data);
+    } 
 
 
     drupal_add_http_header('Content-Type', 'application/json');
@@ -42,7 +48,7 @@ function hotel_rest_api() {
 
 function hotel_create_node($data) {
     
-    watchdog(__FUNCTION__, "data = <pre>@data</pre>", array("@data" => print_r($data, TRUE)));
+    //watchdog(__FUNCTION__, "data = <pre>@data</pre>", array("@data" => print_r($data, TRUE)));
 
     $element = array('data' => array('count' => 0));
 
@@ -131,6 +137,8 @@ function create_hotel_content_info_node($uid, $md5_openid, $apply_form) {
         $wrapper->field_hotel_gps_loc->set(geofield_compute_values($point, GEOFIELD_INPUT_LAT_LON));
 
         $wrapper->field_hotel_address->set($apply_form['formField']['field_hotel_address']['value']);
+        $wrapper->field_hotel_phone->set($apply_form['formField']['field_hotel_phone']['value']);
+        $wrapper->field_myself_md5_openid->set($md5_openid);
 
         if ($ref_nid) {
             $wrapper->field_hotel_facility_ref->set($ref_nid);
@@ -232,6 +240,118 @@ function download_media_id(&$image_file, $media_id) {
     $image_file[] = $file_name;
 
     return null;
+
+}
+
+function get_node_list_count($data) {
+    //watchdog(__FUNCTION__, 'data = <pre>@data</pre>', array('@data' => print_r($data, TRUE)));
+
+    $element = array('data' => array('count' => 0));
+
+    if (!($uid = get_user_id_from_xyz($data['xyz']))) {
+
+        watchdog(__FUNCTION__, 'can not find uid by @xyz', array('@xyz' => $data['xyz']), $severity = WATCHDOG_ERROR);
+        return $element;    //can't find any related user id, return 0
+    }
+
+    $query = new EntityFieldQuery();
+
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', $data['list_node_type'])
+          ->propertyCondition('status', NODE_PUBLISHED)
+          ->fieldCondition('field_myself_md5_openid', 'value', $data['xyz'], '=')
+          ->count();
+
+    $user_count = $query->execute();
+
+    $page_number = 4;  //7 items in every page
+
+    $pages = ceil($user_count / $page_number);
+
+
+    $element['data']['table']['page_number'] = $page_number;
+    $element['data']['table']['pages'] = $pages;
+
+    if ($user_count > 0) {
+        $query = new EntityFieldQuery();
+        $query->entityCondition('entity_type', 'node')
+              ->entityCondition('bundle', $data['list_node_type'])
+              ->propertyCondition('status', NODE_PUBLISHED)
+              ->propertyOrderBy('created', 'DESC')
+              ->fieldCondition('field_myself_md5_openid', 'value', $data['xyz'], '=')
+              ->range(0, $page_number);
+
+        $result = $query->execute();
+        if (!empty($result)) {
+            foreach ($result['node'] as $nid => $node) {
+
+                $node_wrapper = entity_metadata_wrapper('node', $nid);
+
+                $element['data']['table_list'][] = array(
+                    'id' => $nid,
+                    'hotel_name' => $node_wrapper->title->value(),
+                    'hotel_address' => $node_wrapper->field_hotel_address->value(),
+                    'hotel_phone' => $node_wrapper->field_hotel_phone->value(),
+                );
+
+                $element['data']['count'] += 1;
+           }
+        }
+
+    } else {
+        $element['data']['table']['pages'] = 1;
+    }
+
+    $element['data']['message'] = 'ok';
+
+    return $element;
+
+}
+
+/**
+ * get my page list number
+ **/
+function get_node_list_pager($data) {
+
+    //watchdog(__FUNCTION__, 'data = <pre>@data</pre>', array('@data' => print_r($data, TRUE)));
+
+    $element = array('data' => array('count' => 0));
+
+    if (!($uid = get_user_id_from_xyz($data['xyz']))) {
+
+        watchdog(__FUNCTION__, 'can not find uid by @xyz', array('@xyz' => $data['xyz']), $severity = WATCHDOG_ERROR);
+        return $element;    //can't find any related user id, return 0
+    }
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', $data['list_node_type'])
+          ->propertyCondition('status', NODE_PUBLISHED)
+          ->propertyOrderBy('created', 'DESC')
+          ->fieldCondition('field_myself_md5_openid', 'value', $data['xyz'], '=')
+          ->range($data['min_num'], $data['page_num']);
+
+    $result = $query->execute();
+    if (!empty($result)) {
+        foreach ($result['node'] as $nid => $node) {
+
+            $node_wrapper = entity_metadata_wrapper('node', $nid);
+
+            $element['data']['table_list'][] = array(
+                'id' => $nid,
+                'hotel_name' => $node_wrapper->title->value(),
+                'hotel_address' => $node_wrapper->field_hotel_address->value(),
+                'hotel_phone' => $node_wrapper->field_hotel_phone->value(),
+            );
+
+            $element['data']['count'] += 1;
+
+        }
+    }
+
+    $element['data']['message'] = 'ok';
+
+    return $element;
 
 }
 

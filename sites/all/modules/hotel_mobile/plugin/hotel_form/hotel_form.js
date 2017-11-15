@@ -56,12 +56,13 @@
         $fieldset = $('<fieldset>').appendTo($form);
         formField = that.options.formField;
 
-        insert_form_input_field($fieldset, formField.field_hotel_address.fname, formField.field_hotel_address.label);
-        insert_form_input_field($fieldset, formField.field_title.fname, formField.field_title.label);
+        insert_form_input_text_field($fieldset, formField.field_hotel_address.fname, formField.field_hotel_address.label);
+        insert_form_input_text_field($fieldset, formField.field_title.fname, formField.field_title.label);
+        insert_form_input_number_field($fieldset, formField.field_hotel_phone.fname, formField.field_hotel_phone.label);
         insert_image_button_field($fieldset, formField.field_hotel_view_image.fname, formField.field_hotel_view_image.label);
 
-        insert_form_input_field($fieldset, formField.ref.field_hotel_checkin_time.fname, formField.ref.field_hotel_checkin_time.label);
-        insert_form_input_field($fieldset, formField.ref.field_hotel_leave_time.fname, formField.ref.field_hotel_leave_time.label);
+        insert_form_input_text_field($fieldset, formField.ref.field_hotel_checkin_time.fname, formField.ref.field_hotel_checkin_time.label);
+        insert_form_input_text_field($fieldset, formField.ref.field_hotel_leave_time.fname, formField.ref.field_hotel_leave_time.label);
 
 
         insert_form_select2_field($fieldset, 
@@ -123,7 +124,7 @@
     }
 
 
-    function insert_form_input_field($parent, id, label) {
+    function insert_form_input_text_field($parent, id, label) {
         $form_group = $('<div>').attr({'class': 'form-group'}).appendTo($parent);
         $('<label>').attr({
             'for': id,
@@ -133,6 +134,21 @@
         $col_10 = $('<div>').attr({'class': "col-lg-10"}).appendTo($form_group);
         $('<input>').attr({
             'type': "text",
+            'class': "form-control",
+            'id': id
+        }).appendTo($col_10);
+    }
+
+    function insert_form_input_number_field($parent, id, label) {
+        $form_group = $('<div>').attr({'class': 'form-group'}).appendTo($parent);
+        $('<label>').attr({
+            'for': id,
+            'class': "col-lg-2 control-label"
+        }).html(label).appendTo($form_group);
+
+        $col_10 = $('<div>').attr({'class': "col-lg-10"}).appendTo($form_group);
+        $('<input>').attr({
+            'type': "number",
             'class': "form-control",
             'id': id
         }).appendTo($col_10);

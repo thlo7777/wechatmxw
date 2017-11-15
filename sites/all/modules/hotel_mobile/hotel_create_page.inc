@@ -59,6 +59,8 @@ function hotel_create_page() {
     $page['js_var']['form']['field_hotel_address']['fname'] = 'field_hotel_address';
     $page['js_var']['form']['field_hotel_view_image']['fname'] = 'field_hotel_view_image';
     $page['js_var']['form']['field_hotel_view_image']['label'] = $field_instances['field_hotel_view_image']['label'];
+    $page['js_var']['form']['field_hotel_phone']['fname'] = 'field_hotel_phone';
+    $page['js_var']['form']['field_hotel_phone']['label'] = $field_instances['field_hotel_phone']['label'];
 
 
     $all_fields_on_my_website = field_info_fields();

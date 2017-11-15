@@ -499,31 +499,31 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 //    dpm($element);
 
 
-    //$dir_path = drupal_realpath($scheme . 'tttt');
-    $dir_path = drupal_realpath(QRCODE_IMAGE_PATH);
-    //mkdir($dir_path);
-    $field_instances = field_info_instances('node', 'hotel_main_page');
-    dpm($field_instances);
-    $field_instances = field_info_instances('node', 'hotel_facilities_page');
-    dpm($field_instances);
-
-    $all_fields_on_my_website = field_info_fields();
-    $allowed_values= list_allowed_values($all_fields_on_my_website["field_hotel_pay_service"]);
-    //$list = list_allowed_values('field_hotel_hot_water');
-    dpm($allowed_values);
-
-
-    class foo
-    {
-        function do_foo()
-        {
-            return "Doing foo."; 
-        }
-    }
-
-    $bar = new foo;
-    $str = "do_foo";
-    dpm($bar->{$str}());
+//    //$dir_path = drupal_realpath($scheme . 'tttt');
+//    $dir_path = drupal_realpath(QRCODE_IMAGE_PATH);
+//    //mkdir($dir_path);
+//    $field_instances = field_info_instances('node', 'hotel_main_page');
+//    dpm($field_instances);
+//    $field_instances = field_info_instances('node', 'hotel_facilities_page');
+//    dpm($field_instances);
+//
+//    $all_fields_on_my_website = field_info_fields();
+//    $allowed_values= list_allowed_values($all_fields_on_my_website["field_hotel_pay_service"]);
+//    //$list = list_allowed_values('field_hotel_hot_water');
+//    dpm($allowed_values);
+//
+//
+//    class foo
+//    {
+//        function do_foo()
+//        {
+//            return "Doing foo."; 
+//        }
+//    }
+//
+//    $bar = new foo;
+//    $str = "do_foo";
+//    dpm($bar->{$str}());
     //dpm(module_invoke('wechat_asset', 'base_js_array'));
 //    $block = module_invoke('wechat_api', 'test_value', 'fuck', 'me');
 //    $save_path = drupal_realpath($scheme . SUPERMARKET_PATH);
@@ -1018,6 +1018,18 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 //    list($uid, $openID) = preg_split('/::/', $uid_openid);
 //    dpm($uid);
 //    dpm($openID);
+
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+          ->entityCondition('bundle', 'hotel_main_page')
+          ->propertyCondition('status', NODE_PUBLISHED)
+          ->propertyOrderBy('created', 'DESC')
+          ->fieldCondition('field_myself_md5_openid', 'value', "c7c9900599aefceb70320b33452fa08d", '=')
+          //->range($data['min_num'], $data['page_num']);
+          ->range(2, 2);
+
+    $result = $query->execute();
+    dpm($result);
 
     return $form;
 }

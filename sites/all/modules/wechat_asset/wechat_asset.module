@@ -95,6 +95,7 @@ function wechat_asset_css_array() {
 function wechat_asset_base_js_array() {
     global $base_url;
     return array (
+        WECHAT_JS,
         $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery-3.2.1.min.js',
         $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/bootstrap.min.js',
         $base_url . '/' . drupal_get_path('module', 'wechat_asset') . '/js/jquery.ajax-retry.min.js',

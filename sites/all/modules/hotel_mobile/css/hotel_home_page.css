@@ -1,0 +1,20 @@
+#hotel-home-page {
+    padding-top: 15px;
+}
+
+.row {
+    margin-bottom: 20px;
+}
+
+a i {
+    color: red;
+}
+
+a span {
+    color: #191919;
+}
+
+a.btn-default {
+    background-color: #ffffff;
+}
+
