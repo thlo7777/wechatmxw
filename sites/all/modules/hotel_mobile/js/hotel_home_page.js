@@ -18,7 +18,7 @@
     
     $a = $('<a>').attr({
         'class': "btn btn-block btn-lg btn-default",
-        'href': jsObj.create_leaf_page_url
+        'href': jsObj.hotel_list_leaf_page_url
         }).html('\
             <i class="zmdi zmdi-file-text zmdi-hc-3x mdc-text-red"></i><br> \
             <span><i class="zmdi zmdi-border-color zmdi-hc-fw"></i>宣传页</span></a> \

@@ -5,6 +5,7 @@
     // Create the defaults once
     var pluginName = 'hotel_form',
         defaults = {
+            xyz: '',
             formID : "hotel-form",
             formField : {}
         };
@@ -31,7 +32,7 @@
         if (this.options.formID == "hotel-add-form") {
             add_form_init(this)
         } else {
-            //edit_form_init(this)
+            edit_form_init(this)
         }
 
     };
@@ -64,56 +65,182 @@
         insert_form_input_text_field($fieldset, formField.ref.field_hotel_checkin_time.fname, formField.ref.field_hotel_checkin_time.label);
         insert_form_input_text_field($fieldset, formField.ref.field_hotel_leave_time.fname, formField.ref.field_hotel_leave_time.label);
 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_wifi.fname,
+            formField.ref.field_hotel_wifi.label,
+            formField.ref.field_hotel_wifi.list
+            );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_hot_water.fname,
+            formField.ref.field_hotel_hot_water.label,
+            formField.ref.field_hotel_hot_water.list
+            );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_car_park.fname,
+            formField.ref.field_hotel_car_park.label,
+            formField.ref.field_hotel_car_park.list
+            );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_pick_up_service.fname,
+            formField.ref.field_pick_up_service.label,
+            formField.ref.field_pick_up_service.list
+            );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_pay_service.fname,
+            formField.ref.field_hotel_pay_service.label,
+            formField.ref.field_hotel_pay_service.list
+            );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_policy_kids.fname,
+            formField.ref.field_hotel_policy_kids.label,
+            formField.ref.field_hotel_policy_kids.list
+            );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
+            formField.ref.field_hotel_policy_pet.fname,
+            formField.ref.field_hotel_policy_pet.label,
+            formField.ref.field_hotel_policy_pet.list
+            );
+
+        insert_submit_button_field($fieldset, "提交酒店信息", that);
+
+        //call map plugin
+        $(that.element).hotel_map({
+            addressID: '#' + formField.field_hotel_address.fname,
+        }).load_map_init(formField.field_hotel_gps_loc);
+    }   //add form
+
+    function edit_form_init(that) {
+        $form = $('<form>').attr({
+            'class': "form-horizontal",
+            'id': that.options.formID
+        }).appendTo(that.element);
+
+        $fieldset = $('<fieldset>').appendTo($form);
+        formField = that.options.formField;
+
+        insert_form_input_text_field(
+            $fieldset,
+            formField.field_hotel_address.fname,
+            formField.field_hotel_address.label,
+            formField.field_hotel_address.value
+            );
+
+        insert_form_input_text_field(
+            $fieldset,
+            formField.field_title.fname,
+            formField.field_title.label,
+            formField.field_title.value
+        );
+        insert_form_input_number_field(
+            $fieldset,
+            formField.field_hotel_phone.fname,
+            formField.field_hotel_phone.label,
+            formField.field_hotel_phone.value
+        );
+
+        insert_image_button_field(
+            $fieldset,
+            formField.field_hotel_view_image.fname,
+            formField.field_hotel_view_image.label,
+            formField.field_hotel_view_image.value
+        );
+
+        insert_form_input_text_field(
+            $fieldset,
+            formField.ref.field_hotel_checkin_time.fname,
+            formField.ref.field_hotel_checkin_time.label,
+            formField.ref.field_hotel_checkin_time.value
+        );
+
+        insert_form_input_text_field(
+            $fieldset,
+            formField.ref.field_hotel_leave_time.fname,
+            formField.ref.field_hotel_leave_time.label,
+            formField.ref.field_hotel_leave_time.value
+        );
+
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_wifi.fname,
             formField.ref.field_hotel_wifi.label,
             formField.ref.field_hotel_wifi.list,
-            that.options
+            formField.ref.field_hotel_wifi.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_hot_water.fname,
             formField.ref.field_hotel_hot_water.label,
             formField.ref.field_hotel_hot_water.list,
-            that.options
+            formField.ref.field_hotel_hot_water.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_car_park.fname,
             formField.ref.field_hotel_car_park.label,
             formField.ref.field_hotel_car_park.list,
-            that.options
+            formField.ref.field_hotel_car_park.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_pick_up_service.fname,
             formField.ref.field_pick_up_service.label,
             formField.ref.field_pick_up_service.list,
-            that.options
+            formField.ref.field_pick_up_service.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_pay_service.fname,
             formField.ref.field_hotel_pay_service.label,
             formField.ref.field_hotel_pay_service.list,
-            that.options
+            formField.ref.field_hotel_pay_service.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_policy_kids.fname,
             formField.ref.field_hotel_policy_kids.label,
             formField.ref.field_hotel_policy_kids.list,
-            that.options
+            formField.ref.field_hotel_policy_kids.value
             );
 
-        insert_form_select2_field($fieldset, 
+        insert_form_select2_field(
+            $fieldset, 
+            that.options,
             formField.ref.field_hotel_policy_pet.fname,
             formField.ref.field_hotel_policy_pet.label,
             formField.ref.field_hotel_policy_pet.list,
-            that.options
+            formField.ref.field_hotel_policy_pet.value
             );
-
 
         insert_submit_button_field($fieldset, "提交酒店信息", that);
 
@@ -121,10 +248,9 @@
         $(that.element).hotel_map({
             addressID: '#' + formField.field_hotel_address.fname
         }).load_map_init(formField.field_hotel_gps_loc);
-    }
+    }   //edit form
 
-
-    function insert_form_input_text_field($parent, id, label) {
+    function insert_form_input_text_field($parent, id, label, value) {
         $form_group = $('<div>').attr({'class': 'form-group'}).appendTo($parent);
         $('<label>').attr({
             'for': id,
@@ -132,14 +258,23 @@
         }).html(label).appendTo($form_group);
 
         $col_10 = $('<div>').attr({'class': "col-lg-10"}).appendTo($form_group);
-        $('<input>').attr({
-            'type': "text",
-            'class': "form-control",
-            'id': id
-        }).appendTo($col_10);
+        if (value !== undefined) {
+            $('<input>').attr({
+                'type': "text",
+                'class': "form-control",
+                'id': id,
+                'value': value
+            }).appendTo($col_10);
+        } else {
+            $('<input>').attr({
+                'type': "text",
+                'class': "form-control",
+                'id': id
+            }).appendTo($col_10);
+        }
     }
 
-    function insert_form_input_number_field($parent, id, label) {
+    function insert_form_input_number_field($parent, id, label, value) {
         $form_group = $('<div>').attr({'class': 'form-group'}).appendTo($parent);
         $('<label>').attr({
             'for': id,
@@ -147,14 +282,23 @@
         }).html(label).appendTo($form_group);
 
         $col_10 = $('<div>').attr({'class': "col-lg-10"}).appendTo($form_group);
-        $('<input>').attr({
-            'type': "number",
-            'class': "form-control",
-            'id': id
-        }).appendTo($col_10);
+        if (value !== undefined) {
+            $('<input>').attr({
+                'type': "number",
+                'class': "form-control",
+                'id': id,
+                'value': value
+            }).appendTo($col_10);
+        } else {
+            $('<input>').attr({
+                'type': "number",
+                'class': "form-control",
+                'id': id
+            }).appendTo($col_10);
+        }
     }
 
-    function insert_form_select2_field($parent, id, label, data, opts) {
+    function insert_form_select2_field($parent, opts, id, label, data, value) {
         $form_group = $('<div>').attr({'class': 'form-group'}).appendTo($parent);
         $('<label>').attr({
             'for': id,
@@ -173,14 +317,17 @@
             minimumResultsForSearch: -1,
             data: data
         });
-         $("#" + id).on('select2:select', function (event) {
+        $("#" + id).on('select2:select', function (event) {
             console.log(event.params.data.id);
             opts.formField.ref[id].value = event.params.data.id;
             //$(this).val(event.params.data.id).trigger("change");
         });
+        if (value !== undefined || value != null) {
+            $("#" + id).val(value).trigger("change");
+        }
     }
 
-    function insert_image_button_field($parent, id, label) {
+    function insert_image_button_field($parent, id, label, value) {
         //hotel face photo
         $form_group = $('<div>').attr({'class': 'form-group pics-form'}).appendTo($parent);
         $('<label>').attr({
@@ -197,6 +344,16 @@
             '添加图片</a>'
         ).appendTo($col_10);
 
+        if ( value !== undefined || value != null ) {
+            $row = $('<div>').attr({'class': "row pic-grid"}).appendTo($form_group);
+            $col_6 = $('<div>').attr({'class': "col-xs-6 pic-item text-center"}).html(
+                '<img src="' + value + '" class="img-responsive">'
+            ).appendTo($row);
+            $('<a>').attr({
+                'href': "javascript:void(0)",
+                'class': "delete-image"
+                }).html('<i class="zmdi zmdi-minus-circle-outline zmdi-hc-lg"></i>').appendTo($col_6);
+        }
         
         $(document).on('click', '#' + id, function(event) {
             event.preventDefault();
@@ -239,7 +396,6 @@
             if ( !$('#' + opts.formID).form_validation(opts) ) {
                 return ;
             }
-            console.log(opts);
 
             $(this).prop("disabled", true); //disable button before send data to server
             $('#' + opts.formID).submit_register_form(that, '.submit-register-form');
@@ -264,17 +420,26 @@
         var pics_form = upload_deferred('pics-form', opts.formField.field_hotel_view_image.localids);
         $.when(pics_form).done(function(var1) {
             //console.log(var1);
-            if (var1.length){
-                opts.formField.field_hotel_view_image.value = var1;
+            if (var1 !== undefined && var1 != null && var1.length){
+                opts.formField.field_hotel_view_image.new_img = var1;
             }
 
             proBar.setProgress({width: "100%", per: "100%"});
             //call ajax send form to server
-            var json_data = {
-                type: "hotel_add_form",
-                xyz: jsObj.xyz,
-                apply_form: opts
-            };
+            if (opts.formID == "hotel-add-form") {
+                var json_data = {
+                    type: "hotel_add_form",
+                    xyz: opts.xyz,
+                    apply_form: opts
+                };
+            } else {
+                var json_data = {
+                    type: "hotel_edit_form",
+                    xyz: opts.xyz,
+                    nid: opts.nid,
+                    apply_form: opts
+                };
+            }
             var form_submit_finish = function(data, that) {
                 //clear submit button, move to top and aler info waiting audit
                 //window.location.href = opts.manage_url;
@@ -415,7 +580,9 @@
         } else {
             opts.formField.field_hotel_view_image.localids = [];
             img_num.each(function() {
-                opts.formField.field_hotel_view_image.localids.push($(this).attr('src'));
+                if ( $(this).attr('src').indexOf(window.location.hostname) < 0 ) {
+                    opts.formField.field_hotel_view_image.localids.push($(this).attr('src'));
+                }
             });
         }
 

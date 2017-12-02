@@ -104,8 +104,6 @@ function deliver_hotel_create_page_html($page) {
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/progressbar/progressBar.js',
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/js/select2.min.js',
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/js/i18n/zh-CN.js',
-        //$base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/hotel_form/jquery.validate.min.js',
-        //$base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/hotel_form/additional-methods.min.js',
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/hotel_amap/hotel_amap.js',
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/hotel_form/hotel_form.js',
         $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/js/hotel_create_page.js'

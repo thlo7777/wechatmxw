@@ -739,6 +739,57 @@ function wechat_api_get_temp_media($save_path, $media_id) {
 
 }
 
+/**
+ * get user head image file from wechat server
+ *
+ * http请求方式: GET http url
+ * $url:  wechat user head image url  (http://)
+ * $md5id: wechat user md5 openid
+ * return head image file
+ */
+function wechat_api_get_user_head_image($url, $md5id = 'empty'){
+
+    $ch = curl_init($url);
+
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_BINARYTRANSFER,1);
+    $picture = curl_exec($ch);
+    if (!$picture) {
+      watchdog('wechat api', 'can not get head image url, replace locate png image');
+      $picture = file_create_url(drupal_get_path('module', 'dld_restful_api') . '/resource/ttf/dld_logo_300_300.jpg');
+      $img_info = 'image/png';
+    }
+
+    # get the content type
+    $img_info = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    curl_close($ch);
+
+    switch ($img_info) {
+      case "image/gif":
+        $temp_head_image_file = QRCODE_IMAGE_PATH . "wechat_user_headimg_" . $md5id . ".gif";
+        $orig_head_image = file_unmanaged_save_data($picture, $temp_head_image_file, FILE_EXISTS_REPLACE);
+        $head_image_im = imagecreatefromgif($orig_head_image);
+        break;
+      case "image/jpeg":
+        $temp_head_image_file = QRCODE_IMAGE_PATH . "wechat_user_headimg_" . $md5id . ".jpeg";
+        $orig_head_image = file_unmanaged_save_data($picture, $temp_head_image_file, FILE_EXISTS_REPLACE);
+        $head_image_im = imagecreatefromjpeg($orig_head_image);
+        break;
+      case "image/png":
+        $temp_head_image_file = QRCODE_IMAGE_PATH . "wechat_user_headimg_" . $md5id . ".png";
+        $orig_head_image = file_unmanaged_save_data($picture, $temp_head_image_file, FILE_EXISTS_REPLACE);
+        $head_image_im = imagecreatefrompng($orig_head_image);
+        break;
+      case "image/bmp":
+        $temp_head_image_file = QRCODE_IMAGE_PATH . "wechat_user_headimg_" . $md5id . ".bmp";
+        $orig_head_image = file_unmanaged_save_data($picture, $temp_head_image_file, FILE_EXISTS_REPLACE);
+        $head_image_im = imagecreatefromwbmp($orig_head_image);
+        break;
+    }
+
+    return $head_image_im;
+
+}
 
 /**
  * End of wechat api module

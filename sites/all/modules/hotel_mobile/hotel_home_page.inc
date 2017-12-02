@@ -59,11 +59,11 @@ function hotel_home_page() {
         )
     );
 
-    $page['js_var']['create_leaf_page_url'] = t(
+    $page['js_var']['hotel_list_leaf_page_url'] = t(
         variable_get('oauth2 redirect request'),
         array(
             '@APPID' => variable_get('wechat_AppID'),
-            '@URL' => $base_url . "/" . WECHAT_MOBILE_URL . '/hotel-create-leaf-page',
+            '@URL' => $base_url . "/" . WECHAT_MOBILE_URL . '/hotel-list-leaf-page',
             '@SNSAPI' => "snsapi_userinfo",
             '@STATE' => "100",
         )

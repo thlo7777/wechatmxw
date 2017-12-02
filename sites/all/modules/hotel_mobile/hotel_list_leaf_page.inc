@@ -1,7 +1,7 @@
 <?php
 
-//hotel_create_leaf_page.inc
-function hotel_create_leaf_page($nid) {
+//hotel_list_leaf_page.inc
+function hotel_list_leaf_page() {
 
     global $base_url;
     $page = array();
@@ -44,36 +44,44 @@ function hotel_create_leaf_page($nid) {
         }
     }
 
-    $page['title'] = '宣传页推广';
-    $page['body_id'] = "hotel-create-leaf-page";
-    $page['js_var']['body_id'] = '#hotel-create-leaf-page';
+    $page['title'] = '我的店铺';
+    $page['body_id'] = "hotel-list-leaf-page";
+    $page['js_var']['body_id'] = '#hotel-list-leaf-page';
     $page['js_var']['rest_url'] = WECHAT_MOBILE_URL . '/hotel-mobile-rest';
+    $page['js_var']['list_node_type'] = 'hotel_main_page';
 
-    $page['js_var']['nid'] = $nid;
+
+    $page['js_var']['hotel_create_leaf_page_url'] = t(
+        variable_get('oauth2 redirect request'),
+        array(
+            '@APPID' => variable_get('wechat_AppID'),
+            '@URL' => $base_url . "/" . WECHAT_MOBILE_URL . '/hotel-create-leaf-page/%/nid',
+            '@SNSAPI' => "snsapi_userinfo",
+            '@STATE' => "100",
+        )
+    );
 
     return $page;
 }
 
-function deliver_hotel_create_leaf_page_html($page) {
+function deliver_hotel_list_leaf_page_html($page) {
     global $base_url;
 
     $css = module_invoke('wechat_asset', 'css_array');
     array_push($css,
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/css/hotel_create_leaf_page.css',
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/loading_icon1/loading_icon1.css',
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/progressbar/progressBar.css'
+        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/css/hotel_list_leaf_page.css'
     );
 
     //One final thing to check is to make sure that you are not loading any plugins before you load jQuery
     $js = module_invoke('wechat_asset', 'base_js_array');
     array_push($js,
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/loading_icon1/loading_icon1.js',
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/progressbar/progressBar.js',
-        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/js/hotel_create_leaf_page.js'
+        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/table_pag/jquery.bootpag.min.js',
+        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/plugin/table_pag/table_pag.js',
+        $base_url . '/' . drupal_get_path('module', 'hotel_mobile') . '/js/hotel_list_leaf_page.js'
     );
 
     $render['html_page'] = array(
-        '#theme' => 'hotel_create_leaf_page',
+        '#theme' => 'hotel_list_leaf_page',
         '#page' => $page,
         '#styles' => $css,
         '#scripts' => $js,
@@ -83,6 +91,6 @@ function deliver_hotel_create_leaf_page_html($page) {
 }
 
 /**
- * End of hotel_create_leaf_page.inc
+ * End of hotel_list_leaf_page.inc
  */
 

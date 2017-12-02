@@ -225,6 +225,8 @@ function wechat_debug_form_utility_form($form, &$form_state) {
   //dpm($_SESSION['ckeditor']['UserFilesAbsolutePath']);
 
   global $user, $base_url;
+
+  
 //  dpm($user);
 //  $str = "/sites/default/files/u372/e54f10fc1b08ea0db497d4811e761e30.jpg";
 //  $split = 'u372';
@@ -916,10 +918,8 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 //    dpm(check_self_in_groups(26));
 //    dpm(check_self_uid_is_group_admin(270, 26));
 
-//    $wrapper = entity_metadata_wrapper('node', 356);
-//    dpm($wrapper->author->value()->uid);
-//    dpm($wrapper->getPropertyInfo());
-//    dpm($wrapper->field_service_center_operators->value());
+    $wrapper = entity_metadata_wrapper('node', 88);
+    dpm($wrapper->field_hotel_leaf_myqrcode->value()['uri']);
 
 
 
@@ -1019,17 +1019,19 @@ function wechat_debug_form_utility_form($form, &$form_state) {
 //    dpm($uid);
 //    dpm($openID);
 
-    $query = new EntityFieldQuery();
-    $query->entityCondition('entity_type', 'node')
-          ->entityCondition('bundle', 'hotel_main_page')
-          ->propertyCondition('status', NODE_PUBLISHED)
-          ->propertyOrderBy('created', 'DESC')
-          ->fieldCondition('field_myself_md5_openid', 'value', "c7c9900599aefceb70320b33452fa08d", '=')
-          //->range($data['min_num'], $data['page_num']);
-          ->range(2, 2);
+      $wrapper = entity_metadata_wrapper('node', 86);
+      dpm($wrapper->status->value());
 
-    $result = $query->execute();
-    dpm($result);
+
+    $id_matchs = array();
+    $qr_code = "200:1233444444";
+    //$qr_code = "200:";
+    //$qr_code = "";
+    $id_matchs = preg_split("/200:/", $qr_code);
+
+    if ( !empty($id_matchs[1]) ) {
+        dpm($id_matchs);
+    }
 
     return $form;
 }

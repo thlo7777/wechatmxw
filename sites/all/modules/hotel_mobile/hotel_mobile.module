@@ -27,6 +27,16 @@ function hotel_mobile_menu(){
         'file' => 'hotel_rest_api.inc'
     );
 
+    $items[WECHAT_MOBILE_URL . '/hotel-front-page/%/nid'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('客栈首页'),
+        'page callback' => 'hotel_front_page',
+        'page arguments' => array(2),   //hotel nid
+        'delivery callback' => 'deliver_hotel_front_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_front_page.inc'
+    );
+
     $items[WECHAT_MOBILE_URL . '/hotel-home-page'] = array(
         'type' => MENU_CALLBACK,
         'description' => t('店主之家'),
@@ -64,9 +74,18 @@ function hotel_mobile_menu(){
         'file' => 'hotel_create_page.inc'
     );
 
-    $items[WECHAT_MOBILE_URL . '/hotel-create-leaf-page'] = array(
+    $items[WECHAT_MOBILE_URL . '/hotel-list-leaf-page'] = array(
         'type' => MENU_CALLBACK,
-        'description' => t('生成宣传页'),
+        'description' => t('店铺列表'),
+        'page callback' => 'hotel_list_leaf_page',
+        'delivery callback' => 'deliver_hotel_list_leaf_page_html',
+        'access callback' => TRUE,  //anyone can access by ajax
+        'file' => 'hotel_list_leaf_page.inc'
+    );
+
+    $items[WECHAT_MOBILE_URL . '/hotel-create-leaf-page/%/nid'] = array(
+        'type' => MENU_CALLBACK,
+        'description' => t('我的宣传页'),
         'page callback' => 'hotel_create_leaf_page',
         'page arguments' => array(2),   //node id
         'delivery callback' => 'deliver_hotel_create_leaf_page_html',
@@ -85,6 +104,16 @@ function hotel_mobile_theme() {
     return array (
 
         // define dld-mobile-sk-home-page.tpl.php inside module
+        'hotel_front_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
         'hotel_home_page' => array(
             'template' => 'tpl/hotel-page-tpl',
             'variables' => array(
@@ -117,6 +146,17 @@ function hotel_mobile_theme() {
 
         // define dld-mobile-sk-home-page.tpl.php inside module
         'hotel_create_page' => array(
+            'template' => 'tpl/hotel-page-tpl',
+            'variables' => array(
+                'head_title' => null,
+                'styles' => null,
+                'scripts' => null,
+                'page' => null,
+            ),
+        ),
+
+        // define dld-mobile-sk-home-page.tpl.php inside module
+        'hotel_list_leaf_page' => array(
             'template' => 'tpl/hotel-page-tpl',
             'variables' => array(
                 'head_title' => null,

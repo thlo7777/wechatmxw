@@ -28,8 +28,8 @@ function hotel_rest_api() {
     if ($data['type'] == 'hotel_add_form') {
         $send_data = hotel_create_node($data);
     } 
-    if ($data['type'] == 'hotel_update_form') {
-        $send_data = hotel_update_node($data);
+    if ($data['type'] == 'hotel_edit_form') {
+        $send_data = hotel_edit_node($data);
     } 
     if ($data['type'] == 'all_list_count') {
         $send_data = get_node_list_count($data);
@@ -38,6 +38,13 @@ function hotel_rest_api() {
         $send_data = get_node_list_pager($data);
     } 
 
+    if ($data['type'] == 'hotel_get_leaf_tpl') {
+        $send_data = get_leaf_tpl($data);
+    } 
+
+    if ($data['type'] == 'hotel_generate_leaf') {
+        $send_data = create_my_leaf_page($data);
+    } 
 
     drupal_add_http_header('Content-Type', 'application/json');
     $json_data = json_encode($send_data, JSON_UNESCAPED_UNICODE);
@@ -145,10 +152,10 @@ function create_hotel_content_info_node($uid, $md5_openid, $apply_form) {
         }
 
         /**
-         * upload field_hotel_view_image
+         * create field_hotel_view_image
          **/
         if (! set_pics_field_pictures($wrapper->field_hotel_view_image,
-            $apply_form['formField']['field_hotel_view_image']['value'], 'field_hotel_view_image'))
+            $apply_form['formField']['field_hotel_view_image']['new_img'], 'field_hotel_view_image'))
         {
             throw new EntityMetadataWrapperException('field_hotel_view_image error');
             return false;
@@ -243,6 +250,73 @@ function download_media_id(&$image_file, $media_id) {
 
 }
 
+function hotel_edit_node($data) {
+    //watchdog(__FUNCTION__, "data = <pre>@data</pre>", array("@data" => print_r($data, TRUE)));
+
+    $element = array('data' => array('count' => 0));
+
+
+    if (!($uid = get_user_id_from_xyz($data['xyz']))) {
+
+        watchdog(__FUNCTION__, 'can not find uid by @xyz', array('@xyz' => $data['xyz']), $severity = WATCHDOG_ERROR);
+        return $element;    //can't find any related user id, return 0
+    }
+
+    if ( !update_hotel_content_info_node($data['nid'], $data['xyz'], $data['apply_form']) ) {
+        return $element;    //can't update apply form node, return 0
+    } else {
+
+        $element['data']['message'] = 'ok';
+        $element['data']['count'] = 1;
+    }
+
+    return $element;
+}
+
+function update_hotel_content_info_node($nid, $md5_openid, $apply_form) {
+
+    try {
+        $wrapper = entity_metadata_wrapper('node', $nid);
+       
+        $wrapper->title->set($apply_form['formField']['field_title']['value']);
+
+        $point = array(
+            'lat' => $apply_form['formField']['field_hotel_gps_loc']['latitude'],
+            'lon' => $apply_form['formField']['field_hotel_gps_loc']['longitude']
+        );
+        $wrapper->field_hotel_gps_loc->set(geofield_compute_values($point, GEOFIELD_INPUT_LAT_LON));
+
+        $wrapper->field_hotel_address->set($apply_form['formField']['field_hotel_address']['value']);
+        $wrapper->field_hotel_phone->set($apply_form['formField']['field_hotel_phone']['value']);
+
+        $ref_wrapper = entity_metadata_wrapper('node', $wrapper->field_hotel_facility_ref->value()->nid);
+
+        foreach ($apply_form['formField']['ref'] as $key => $field) {
+            if ( !empty($field['value']) ) {
+                $ref_wrapper->{$key}->set($field['value']);
+            }
+        }
+        $ref_wrapper->save();
+
+        //update image
+        if ( !empty($apply_form['formField']['field_hotel_view_image']['new_img']) ) {
+            set_pics_field_pictures(
+                $wrapper->field_hotel_view_image,
+                $apply_form['formField']['field_hotel_view_image']['new_img'],
+                'field_hotel_view_image'
+            );
+        }
+
+        $wrapper->save();
+        return true;
+    }
+    catch (EntityMetadataWrapperException $e) {
+        watchdog_exception(__FUNCTION__, $e);
+        return false;
+    }
+
+}
+
 function get_node_list_count($data) {
     //watchdog(__FUNCTION__, 'data = <pre>@data</pre>', array('@data' => print_r($data, TRUE)));
 
@@ -264,7 +338,7 @@ function get_node_list_count($data) {
 
     $user_count = $query->execute();
 
-    $page_number = 4;  //7 items in every page
+    $page_number = 7;  //7 items in every page
 
     $pages = ceil($user_count / $page_number);
 
@@ -352,6 +426,178 @@ function get_node_list_pager($data) {
     $element['data']['message'] = 'ok';
 
     return $element;
+
+}
+
+function get_leaf_tpl($data) {
+    $element = array('data' => array('count' => 0));
+
+    if (!($uid = get_user_id_from_xyz($data['xyz']))) {
+
+        watchdog(__FUNCTION__, 'can not find uid by @xyz', array('@xyz' => $data['xyz']), $severity = WATCHDOG_ERROR);
+        return $element;    //can't find any related user id, return 0
+    }
+
+    $wrapper = entity_metadata_wrapper('node', $data['nid']);
+   
+    if ( !empty($wrapper->field_promotion_leaf_tpl->value()) ) {
+        $element['data']['leaf_tpl'] = file_create_url($wrapper->field_promotion_leaf_tpl->value()['uri']);
+
+        if ( !empty($leaf_node = $wrapper->field_hotel_leaf_node_ref->value()) ) {
+
+            $leaf_wrapper = entity_metadata_wrapper('node', $leaf_node->nid);
+            $element['data']['leaflet_file'] = file_create_url($leaf_wrapper->field_hotel_leaf_myqrcode->value()['uri']);
+        }
+        $element['data']['count'] += 1;
+    }
+
+    $element['data']['message'] = 'ok';
+
+    return $element;
+}
+
+function create_my_leaf_page($data) {
+
+    //watchdog(__FUNCTION__, 'data = <pre>@data</pre>', array('@data' => print_r($data, TRUE)));
+
+    $element = array('data' => array('count' => 0));
+    if (!($uid = get_user_id_from_xyz($data['xyz']))) {
+
+        watchdog(__FUNCTION__, 'can not find uid by @xyz', array('@xyz' => $data['xyz']), $severity = WATCHDOG_ERROR);
+        return $element;    //can't find any related user id, return 0
+    }
+
+    $wrapper = entity_metadata_wrapper('node', $data['nid']);
+   
+    if ( !empty($data['apply_form']['formField']['field_promotion_leaf_tpl']['new_img']) ) {
+        //save picture
+        set_pics_field_pictures(
+            $wrapper->field_promotion_leaf_tpl,
+            $data['apply_form']['formField']['field_promotion_leaf_tpl']['new_img'],
+            'field_promotion_leaf_tpl'
+        );
+
+        $wrapper->save();
+        $tpl_file = file_load($wrapper->field_promotion_leaf_tpl->value()['fid'])->uri;
+    } else {
+        $tpl_file = $wrapper->field_promotion_leaf_tpl->value()['uri'];
+    }
+
+    //generate my leaf picture
+    //1. get wechat user head img and nick name
+    $user_wrapper = entity_metadata_wrapper('user', $uid);
+    $user_info = module_invoke('wechat_api', 'get_user_info', $user_wrapper->field_wechat_openid->value());
+    if ( $user_info ) {
+        //watchdog(__FUNCTION__, 'user info <pre>@data</pre>', array('@data' => print_r($user_info, true)));
+        //2. create qrcode
+        //3. create pormotion leaf
+        $leaf_file = create_promotion_leaf_image($user_info, $tpl_file, $data['xyz'], $data['nid']);
+
+        if ( empty($leaf_node = $wrapper->field_hotel_leaf_node_ref->value()) ) {
+            if ( $leaf_node = create_user_leaflet_node($uid, $wrapper->title->value(), $leaf_file, $data['xyz'], $data['nid']) ) {
+
+                $wrapper->field_hotel_leaf_node_ref->set($leaf_node['leaf_nid']);
+                $wrapper->save();
+                $element['data']['leaf_file'] = $leaf_node['leaf_url'];
+                $element['data']['count'] += 1;
+            }
+        } else {
+            $leaf_wrapper = entity_metadata_wrapper('node', $leaf_node->nid);
+            $leaf_wrapper->field_hotel_leaf_myqrcode->set(array('fid' => $leaf_file->fid));
+            $leaf_wrapper->save();
+
+            $element['data']['leaf_file'] = file_create_url($leaf_file->uri);
+            $element['data']['count'] += 1;
+        }
+
+    }
+
+    $element['data']['message'] = 'ok';
+
+    return $element;
+}
+
+function create_user_leaflet_node($uid, $title, $leaf_file, $md5_openid, $hotel_nid) {
+
+    global $language;
+    $values = array(
+      'type' => 'hotel_promote_leaf_node',
+      'uid' => $uid,
+      'status' => 1,
+      'language' => $language->language
+    );
+    $entity = entity_create('node', $values);
+    $wrapper = entity_metadata_wrapper('node', $entity);
+    $wrapper->title->set($title . "宣传页");
+
+    $wrapper->field_hotel_leaf_myqrcode->set(array('fid' => $leaf_file->fid));
+    $wrapper->field_myself_md5_openid->set($md5_openid);
+    $wrapper->field_hotel_nid->set($hotel_nid);
+
+    $wrapper->save();
+
+    return array(
+        'leaf_nid' => $wrapper->nid->value(),
+        'leaf_url' => file_create_url($leaf_file->uri)
+    );
+}
+
+function create_promotion_leaf_image($user_info, $tpl_file, $md5_openid, $nid) {
+
+    global $base_url;
+
+   //add qr code with dld log
+    $library = libraries_load('wxpayapi');
+
+
+    $user_info = module_invoke('wechat_api', 'get_user_info', $user_info->openid);
+    $head_image_im = module_invoke('wechat_api', 'get_user_head_image', $user_info->headimgurl, $md5_openid);
+
+    $leaflet = imagecreatefromjpeg($tpl_file);
+    $leaflet_width = imagesx($leaflet);
+    $leaflet_height = imagesy($leaflet);
+
+    $leaf_url = t(
+        variable_get('oauth2 redirect request'),
+        array(
+            '@APPID' => variable_get('wechat_AppID'),
+            '@URL' => $base_url . "/" . WECHAT_MOBILE_URL . '/hotel-front-page/' . $nid . '/nid',
+            '@SNSAPI' => "snsapi_base",
+            '@STATE' => "200:" . $md5_openid,
+        )
+    );
+    $qr_file = QRCODE_IMAGE_PATH . $md5_openid . "qr_scan.png";
+    QRcode::png($leaf_url, $qr_file, QR_ECLEVEL_L, 3, 2);
+
+    $QR = imagecreatefrompng($qr_file);
+    $QR_width = imagesx($QR);
+    $QR_height = imagesy($QR);
+    $logo_width = imagesx($head_image_im);
+    $logo_height = imagesy($head_image_im);
+   // Scale logo to fit in the QR Code
+    $logo_qr_width = $QR_width/4;
+    $scale = $logo_width/$logo_qr_width;
+    $logo_qr_height = $logo_height/$scale;
+
+    imagecopyresampled($QR, $head_image_im, $QR_width/2.65, $QR_height/2.65,
+        0, 0, $logo_qr_width, $logo_qr_height, $logo_width, $logo_height);
+
+   //leaflet templagte, top, left x = 300, y = 826 QRcode with = 190, QRcode height = 190
+    imagecopyresampled($leaflet, $QR, 289, 799,
+        0, 0, 190, 190, $QR_width, $QR_height);
+
+    //add mt rand create different image file name since wechat cache for same file name
+    $leaflet_local = QRCODE_IMAGE_PATH . $md5_openid . "_" . $nid . "_" . mt_rand() . "_hotel_leaflet.jpg";
+    imagejpeg($leaflet, $leaflet_local, 100);
+    imagedestroy($leaflet);
+    imagedestroy($head_image_im);
+    imagedestroy($QR);
+
+
+    $file_temp = file_get_contents($leaflet_local);
+    //$file = file_save_data($file_temp, $leaflet_local, FILE_EXISTS_REPLACE);
+    $leaf_file = file_save_data($file_temp, $leaflet_local, FILE_EXISTS_REPLACE);
+    return $leaf_file;
 
 }
 

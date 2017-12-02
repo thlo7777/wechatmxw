@@ -1,0 +1,19 @@
+#hotel-create-leaf-page {
+    padding-top: 20px;
+    padding-bottom: 60px;
+}
+
+.pic-grid {
+    margin-left: 0px;
+    margin-right: 0px;
+    padding: 0 15px;
+}
+
+.pic-grid .pic-item {
+    margin-top: 7px;
+}
+
+.row.pic-grid .pic-item {
+    padding-right: 0px;
+    padding-left: 0px;
+}

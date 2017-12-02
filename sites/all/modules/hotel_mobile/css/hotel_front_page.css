@@ -1,0 +1,16 @@
+#hotel-front-page {
+    padding-bottom: 60px;
+}
+
+.hotel-footer {
+    background: #ededed;
+    padding: 10px 10px;
+}
+
+.hotel-footer a {
+    font-size: 15px;
+}
+
+.hotel-footer a:active {
+    text-decoration: none;
+}

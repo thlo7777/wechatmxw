@@ -54,17 +54,24 @@
         loding_icon1 = this.loading_icon1();
         loding_icon1.loading_icon1_on();
 
-        get_gpslocation_callback = function (address, target_id) {
+        get_gpslocation_callback = function (address, target_id, dragType) {
 
             AMapUI.loadUI(['misc/PositionPicker'], function(PositionPicker) {
                 map = new AMap.Map(target_id, {
                     zoom: 16,
                     center:[address.longitude, address.latitude]
                 });
-                var positionPicker = new PositionPicker({
-                    mode:'dragMap',//设定为拖拽地图模式，可选'dragMap'、'dragMarker'，默认为'dragMap'
-                    map:map//依赖地图对象
-                });
+                if (dragType == 'dragMarker') {
+                    var positionPicker = new PositionPicker({
+                        mode:'dragMarker',//设定为拖拽地图模式，可选'dragMap'、'dragMarker'，默认为'dragMap'
+                        map:map//依赖地图对象
+                    });
+                } else {
+                    var positionPicker = new PositionPicker({
+                        mode:'dragMap',//设定为拖拽地图模式，可选'dragMap'、'dragMarker'，默认为'dragMap'
+                        map:map//依赖地图对象
+                    });
+                }
                 //TODO:事件绑定、结果处理等
                 //
 
@@ -105,9 +112,16 @@
             loding_icon1.loading_icon1_off();
         };
 
-        this.amap_getaddress_from_wechat_geo(opts.amapID, get_gpslocation_callback, 'get_gpslocation_callback');
-        return this;
+        if (gps_loc.value === undefined) {
+            this.amap_getaddress_from_wechat_geo(opts.amapID, get_gpslocation_callback, 'get_gpslocation_callback');
+        } else {
+            get_gpslocation_callback({latitude: gps_loc.value.lat, longitude: gps_loc.value.lon}, opts.amapID, 'dragMarker');
+        }
 
+        return this;
+    }
+
+    $.fn.front_map = function(gps_loc) {
     }
 
 }(jQuery, window, document));
